@@ -23,12 +23,14 @@ func New(opts ...cobrax.Option) *cobra.Command {
 		RunE:  run,
 		Args:  cobra.MaximumNArgs(1),
 
+		ValidArgsFunction: config.CompleteDomain,
 		SilenceErrors:     true,
 		DisableAutoGenTag: true,
 	}
 
 	conf := config.New()
 	conf.RegisterFlags(cmd)
+	conf.RegisterCompletions(cmd)
 
 	ctx := cmd.Context()
 	if ctx == nil {
