@@ -18,10 +18,10 @@ const (
 	FlagProxied   = "proxied"
 	FlagTTL       = "ttl"
 
-	FlagCloudflareToken     = "cloudflare-token"
-	FlagCloudflareKey       = "cloudflare-key"
-	FlagCloudflareEmail     = "cloudflare-email"
-	FlagCloudflareAccountID = "cloudflare-account-id"
+	FlagCloudflareToken     = "cf-api-token" //nolint:gosec
+	FlagCloudflareKey       = "cf-api-key"
+	FlagCloudflareEmail     = "cf-api-email"
+	FlagCloudflareAccountID = "cf-account-id"
 )
 
 func (c *Config) RegisterFlags(cmd *cobra.Command) {
