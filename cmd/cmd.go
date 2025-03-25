@@ -71,6 +71,10 @@ func run(cmd *cobra.Command, args []string) error {
 
 	cmd.SilenceUsage = true
 
+	if conf.Interval != 0 {
+		slog.Info("Cloudflare DDNS", "version", cobrax.GetVersion(cmd), "commit", cobrax.GetCommit(cmd))
+	}
+
 	ctx, cancel := signal.NotifyContext(cmd.Context(), os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
 	defer cancel()
 

@@ -21,5 +21,6 @@ cloudflare-ddns [flags]
       --proxied                   Enables Cloudflare proxy for the record
       --source strings            Enabled IP sources (supports cloudflare_tls, cloudflare, opendns_tls, opendns, ipinfo, ipify) (default [cloudflare_tls,opendns_tls,ipinfo,ipify,cloudflare,opendns])
       --ttl float                 DNS record TTL (default auto)
+  -v, --version                   version for cloudflare-ddns
 ```
 

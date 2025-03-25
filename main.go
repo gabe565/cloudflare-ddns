@@ -6,13 +6,16 @@ import (
 
 	"gabe565.com/cloudflare-ddns/cmd"
 	"gabe565.com/cloudflare-ddns/internal/config"
+	"gabe565.com/utils/cobrax"
 	"gabe565.com/utils/slogx"
 )
+
+var version = "beta"
 
 func main() {
 	config.InitLog(os.Stderr, slogx.LevelInfo, slogx.FormatAuto)
 
-	root := cmd.New()
+	root := cmd.New(cobrax.WithVersion(version))
 	if err := root.Execute(); err != nil {
 		slog.Error(err.Error())
 		os.Exit(1)
