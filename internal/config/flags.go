@@ -30,11 +30,11 @@ func (c *Config) RegisterFlags(cmd *cobra.Command) {
 	fs.Var(&c.LogLevel, FlagLogLevel, "Log level (one of "+strings.Join(slogx.LevelStrings(), ", ")+")")
 	fs.Var(&c.LogFormat, FlagLogFormat, "Log format (one of "+strings.Join(slogx.FormatStrings(), ", ")+")")
 
-	fs.StringSliceVar(&c.SourceStrs, FlagSource, c.SourceStrs, "Enabled IP sources (supports "+strings.Join(SourceStrings(), ", ")+")")
-	fs.StringVar(&c.Domain, FlagDomain, c.Domain, "Domain to manage")
-	fs.DurationVar(&c.Interval, FlagInterval, c.Interval, "Update interval")
-	fs.BoolVar(&c.Proxied, FlagProxied, c.Proxied, "Enables Cloudflare proxy for the record")
-	fs.Float64Var(&c.TTL, FlagTTL, c.TTL, "DNS record TTL (default auto)")
+	fs.StringSliceVarP(&c.SourceStrs, FlagSource, "s", c.SourceStrs, "Enabled IP sources (supports "+strings.Join(SourceStrings(), ", ")+")")
+	fs.StringVarP(&c.Domain, FlagDomain, "d", c.Domain, "Domain to manage")
+	fs.DurationVarP(&c.Interval, FlagInterval, "i", c.Interval, "Update interval")
+	fs.BoolVarP(&c.Proxied, FlagProxied, "p", c.Proxied, "Enables Cloudflare proxy for the record")
+	fs.Float64VarP(&c.TTL, FlagTTL, "t", c.TTL, "DNS record TTL (default auto)")
 	fs.BoolVar(&c.DNSUseTCP, FlagDNSUseTCP, c.DNSUseTCP, "Force DNS to use TCP")
 
 	fs.StringVar(&c.CloudflareToken, FlagCloudflareToken, c.CloudflareToken, "Cloudflare API token (recommended)")
