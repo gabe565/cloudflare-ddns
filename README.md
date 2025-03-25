@@ -1,4 +1,8 @@
 # Cloudflare DDNS
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/gabe565/cloudflare-ddns)](https://github.com/gabe565/cloudflare-ddns/releases)
+[![Build](https://github.com/gabe565/cloudflare-ddns/actions/workflows/build.yml/badge.svg)](https://github.com/gabe565/cloudflare-ddns/actions/workflows/build.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gabe565/cloudflare-ddns)](https://goreportcard.com/report/github.com/gabe565/cloudflare-ddns)
+
 Cloudflare DDNS is a command-line tool that keeps a Cloudflare DNS record in sync with your public IP address.
 
 ## Features
