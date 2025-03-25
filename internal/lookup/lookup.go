@@ -15,7 +15,7 @@ var ErrAllSourcesFailed = errors.New("all sources failed")
 func GetPublicIP(ctx context.Context, conf *config.Config) (string, error) {
 	client := New(WithDNSUseTCP(conf.DNSUseTCP))
 
-	var errs []error
+	var errs []error //nolint:prealloc
 	for _, source := range conf.Sources {
 		slogx.Trace("Querying source", "name", source)
 		var content string
