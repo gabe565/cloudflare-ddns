@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 	"io"
@@ -75,6 +76,10 @@ func generateEnvDoc(cmd *cobra.Command, output string) error {
 			"`" + value + "`",
 		})
 	})
+	slices.SortFunc(rows, func(a, b table.Row) int {
+		return cmp.Compare(a[0].(string), b[0].(string))
+	})
+
 	t := table.NewWriter()
 	t.AppendHeader(table.Row{"Name", "Usage", "Default"})
 	t.AppendRows(rows)

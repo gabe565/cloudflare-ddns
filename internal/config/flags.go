@@ -18,9 +18,10 @@ const (
 	FlagProxied   = "proxied"
 	FlagTTL       = "ttl"
 
-	FlagCloudflareToken = "cloudflare-token"
-	FlagCloudflareKey   = "cloudflare-key"
-	FlagCloudflareEmail = "cloudflare-email"
+	FlagCloudflareToken     = "cloudflare-token"
+	FlagCloudflareKey       = "cloudflare-key"
+	FlagCloudflareEmail     = "cloudflare-email"
+	FlagCloudflareAccountID = "cloudflare-account-id"
 )
 
 func (c *Config) RegisterFlags(cmd *cobra.Command) {
@@ -39,4 +40,5 @@ func (c *Config) RegisterFlags(cmd *cobra.Command) {
 	fs.StringVar(&c.CloudflareToken, FlagCloudflareToken, c.CloudflareToken, "Cloudflare API token (recommended)")
 	fs.StringVar(&c.CloudflareKey, FlagCloudflareKey, c.CloudflareKey, "Cloudflare API key")
 	fs.StringVar(&c.CloudflareEmail, FlagCloudflareEmail, c.CloudflareEmail, "Cloudflare account email address")
+	fs.StringVar(&c.CloudflareAccountID, FlagCloudflareAccountID, c.CloudflareAccountID, "Cloudflare account ID")
 }

@@ -21,9 +21,10 @@ type Config struct {
 	Proxied    bool
 	TTL        float64
 
-	CloudflareToken string
-	CloudflareKey   string
-	CloudflareEmail string
+	CloudflareToken     string
+	CloudflareKey       string
+	CloudflareEmail     string
+	CloudflareAccountID string
 }
 
 func New() *Config {

@@ -2,6 +2,7 @@
 
 | Name | Usage | Default |
 | --- | --- | --- |
+| `CF_ACCOUNT_ID` | Cloudflare account ID | ` ` |
 | `CF_API_EMAIL` | Cloudflare account email address | ` ` |
 | `CF_API_KEY` | Cloudflare API key | ` ` |
 | `CF_API_TOKEN` | Cloudflare API token (recommended) | ` ` |
