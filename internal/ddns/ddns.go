@@ -18,9 +18,6 @@ import (
 
 func Update(ctx context.Context, conf *config.Config) error {
 	start := time.Now()
-	defer func() {
-		slog.Debug("Update complete", "took", time.Since(start))
-	}()
 
 	if conf.Timeout != 0 {
 		var cancel context.CancelFunc
@@ -54,7 +51,14 @@ func Update(ctx context.Context, conf *config.Config) error {
 		}()
 	}
 	wg.Wait()
-	return errors.Join(errs...)
+
+	if err := errors.Join(errs...); err != nil {
+		slog.Debug("Update failed", "took", time.Since(start), "error", err)
+		return err
+	}
+
+	slog.Debug("Update complete", "took", time.Since(start))
+	return nil
 }
 
 func updateDomain(ctx context.Context, conf *config.Config, client *cloudflare.Client, domain, ip string) error {
