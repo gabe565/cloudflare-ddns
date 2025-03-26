@@ -9,18 +9,6 @@ import (
 	"github.com/miekg/dns"
 )
 
-func New(opts ...Option) *Client {
-	c := &Client{}
-	for _, opt := range opts {
-		opt(c)
-	}
-	return c
-}
-
-type Client struct {
-	DNSUseTCP bool
-}
-
 type lookupDNSOptions struct {
 	server string
 	useTCP bool
@@ -72,11 +60,15 @@ func lookupDNS(ctx context.Context, opts lookupDNSOptions) (string, error) {
 	return val, nil
 }
 
-func (c *Client) CloudflareTLS(ctx context.Context) (string, error) {
+func Cloudflare(ctx context.Context, tls, tcp bool) (string, error) {
+	server := "1.1.1.1:53"
+	if tls {
+		server = "1.1.1.1:853"
+	}
 	return lookupDNS(ctx, lookupDNSOptions{
-		server: "1.1.1.1:853",
-		useTLS: true,
-		useTCP: c.DNSUseTCP,
+		server: server,
+		useTLS: tls,
+		useTCP: tcp,
 		req: dns.Question{
 			Name:   "whoami.cloudflare.",
 			Qtype:  dns.TypeTXT,
@@ -85,35 +77,15 @@ func (c *Client) CloudflareTLS(ctx context.Context) (string, error) {
 	})
 }
 
-func (c *Client) Cloudflare(ctx context.Context) (string, error) {
+func OpenDNS(ctx context.Context, tls, tcp bool) (string, error) {
+	server := "dns.opendns.com:53"
+	if tls {
+		server = "dns.opendns.com:853"
+	}
 	return lookupDNS(ctx, lookupDNSOptions{
-		server: "1.1.1.1:53",
-		useTCP: c.DNSUseTCP,
-		req: dns.Question{
-			Name:   "whoami.cloudflare.",
-			Qtype:  dns.TypeTXT,
-			Qclass: dns.ClassCHAOS,
-		},
-	})
-}
-
-func (c *Client) OpenDNSTLS(ctx context.Context) (string, error) {
-	return lookupDNS(ctx, lookupDNSOptions{
-		server: "dns.opendns.com:853",
-		useTLS: true,
-		useTCP: c.DNSUseTCP,
-		req: dns.Question{
-			Name:   "myip.opendns.com.",
-			Qtype:  dns.TypeA,
-			Qclass: dns.ClassANY,
-		},
-	})
-}
-
-func (c *Client) OpenDNS(ctx context.Context) (string, error) {
-	return lookupDNS(ctx, lookupDNSOptions{
-		server: "dns.opendns.com:53",
-		useTCP: c.DNSUseTCP,
+		server: server,
+		useTLS: tls,
+		useTCP: tcp,
 		req: dns.Question{
 			Name:   "myip.opendns.com.",
 			Qtype:  dns.TypeA,

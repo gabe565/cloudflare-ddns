@@ -13,8 +13,6 @@ import (
 var ErrAllSourcesFailed = errors.New("all sources failed")
 
 func GetPublicIP(ctx context.Context, conf *config.Config) (string, error) {
-	client := New(WithDNSUseTCP(conf.DNSUseTCP))
-
 	sources, err := conf.Sources()
 	if err != nil {
 		return "", err
@@ -27,17 +25,17 @@ func GetPublicIP(ctx context.Context, conf *config.Config) (string, error) {
 		var err error
 		switch source {
 		case config.SourceCloudflareTLS:
-			content, err = client.CloudflareTLS(ctx)
+			content, err = Cloudflare(ctx, true, conf.DNSUseTCP)
 		case config.SourceCloudflare:
-			content, err = client.Cloudflare(ctx)
+			content, err = Cloudflare(ctx, false, conf.DNSUseTCP)
 		case config.SourceOpenDNSTLS:
-			content, err = client.OpenDNSTLS(ctx)
+			content, err = OpenDNS(ctx, true, conf.DNSUseTCP)
 		case config.SourceOpenDNS:
-			content, err = client.OpenDNS(ctx)
+			content, err = OpenDNS(ctx, false, conf.DNSUseTCP)
 		case config.SourceIPInfo:
-			content, err = client.IPInfo(ctx)
+			content, err = IPInfo(ctx)
 		case config.SourceIPify:
-			content, err = client.IPify(ctx)
+			content, err = IPify(ctx)
 		}
 		if err == nil {
 			slogx.Trace("Got response", "source", source, "content", content)

@@ -49,10 +49,10 @@ func HTTPPlain(ctx context.Context, url string, unquote bool) (string, error) {
 	return string(b), nil
 }
 
-func (c *Client) IPInfo(ctx context.Context) (string, error) {
+func IPInfo(ctx context.Context) (string, error) {
 	return HTTPPlain(ctx, "https://ipinfo.io/ip", false)
 }
 
-func (c *Client) IPify(ctx context.Context) (string, error) {
+func IPify(ctx context.Context) (string, error) {
 	return HTTPPlain(ctx, "https://api.ipify.org", false)
 }
