@@ -21,7 +21,6 @@ func New(opts ...cobrax.Option) *cobra.Command {
 		Use:   "cloudflare-ddns",
 		Short: "Sync a Cloudflare DNS record with your current public IP address",
 		RunE:  run,
-		Args:  cobra.MaximumNArgs(1),
 
 		ValidArgsFunction: config.CompleteDomain,
 		SilenceErrors:     true,
@@ -63,9 +62,9 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) != 0 {
-		conf.Domain = args[0]
+		conf.Domains = args
 	}
-	if conf.Domain == "" {
+	if len(conf.Domains) == 0 {
 		return ErrDomainRequired
 	}
 

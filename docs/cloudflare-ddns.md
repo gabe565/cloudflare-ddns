@@ -14,7 +14,7 @@ cloudflare-ddns [flags]
       --cf-api-key string      Cloudflare API key
       --cf-api-token string    Cloudflare API token (recommended)
       --dns-tcp                Force DNS to use TCP
-  -d, --domain string          Domain to manage
+  -d, --domain strings         Domains to manage
   -h, --help                   help for cloudflare-ddns
   -i, --interval duration      Update interval
       --log-format string      Log format (one of auto, color, plain, json) (default "auto")

@@ -31,7 +31,7 @@ func (c *Config) RegisterFlags(cmd *cobra.Command) {
 	fs.Var(&c.LogFormat, FlagLogFormat, "Log format (one of "+strings.Join(slogx.FormatStrings(), ", ")+")")
 
 	fs.StringSliceVarP(&c.SourceStrs, FlagSource, "s", c.SourceStrs, "Enabled IP sources (supports "+strings.Join(SourceStrings(), ", ")+")")
-	fs.StringVarP(&c.Domain, FlagDomain, "d", c.Domain, "Domain to manage")
+	fs.StringSliceVarP(&c.Domains, FlagDomain, "d", c.Domains, "Domains to manage")
 	fs.DurationVarP(&c.Interval, FlagInterval, "i", c.Interval, "Update interval")
 	fs.BoolVarP(&c.Proxied, FlagProxied, "p", c.Proxied, "Enables Cloudflare proxy for the record")
 	fs.Float64VarP(&c.TTL, FlagTTL, "t", c.TTL, "DNS record TTL (default auto)")

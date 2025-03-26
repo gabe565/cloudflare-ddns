@@ -15,7 +15,7 @@ type Config struct {
 	LogFormat slogx.Format
 
 	SourceStrs []string
-	Domain     string
+	Domains    []string
 	Interval   time.Duration
 	DNSUseTCP  bool
 	Proxied    bool

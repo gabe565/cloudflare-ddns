@@ -1,6 +1,8 @@
 package config
 
 import (
+	"slices"
+
 	"gabe565.com/utils/must"
 	"gabe565.com/utils/slogx"
 	"github.com/cloudflare/cloudflare-go/v4/zones"
@@ -29,7 +31,7 @@ func (c *Config) RegisterCompletions(cmd *cobra.Command) {
 	must.Must(cmd.RegisterFlagCompletionFunc(FlagCloudflareEmail, cobra.NoFileCompletions))
 }
 
-func CompleteDomain(cmd *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
+func CompleteDomain(cmd *cobra.Command, args []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
 	conf, err := Load(cmd)
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveError
@@ -43,7 +45,10 @@ func CompleteDomain(cmd *cobra.Command, _ []string, _ string) ([]cobra.Completio
 	var domains []string
 	iter := client.Zones.ListAutoPaging(cmd.Context(), zones.ZoneListParams{})
 	for iter.Next() {
-		domains = append(domains, iter.Current().Name)
+		name := iter.Current().Name
+		if !slices.Contains(args, name) {
+			domains = append(domains, name)
+		}
 	}
 	if err := iter.Err(); err != nil {
 		return nil, cobra.ShellCompDirectiveError

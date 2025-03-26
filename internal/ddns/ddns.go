@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
+	"sync"
 	"time"
 
 	"gabe565.com/cloudflare-ddns/internal/config"
@@ -32,33 +33,53 @@ func Update(ctx context.Context, conf *config.Config) error {
 		return err
 	}
 
-	zone, err := FindZone(ctx, client, conf.CloudflareAccountID, conf.Domain)
+	var errs []error
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	for _, domain := range conf.Domains {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := updateDomain(ctx, conf, client, domain, ip); err != nil {
+				mu.Lock()
+				errs = append(errs, err)
+				mu.Unlock()
+			}
+		}()
+	}
+	wg.Wait()
+	return errors.Join(errs...)
+}
+
+func updateDomain(ctx context.Context, conf *config.Config, client *cloudflare.Client, domain, ip string) error {
+	zone, err := FindZone(ctx, client, conf.CloudflareAccountID, domain)
 	if err != nil {
 		return err
 	}
 
-	record, err := GetRecord(ctx, client, zone, conf.Domain)
+	record, err := GetRecord(ctx, client, zone, domain)
 	if err != nil && !errors.Is(err, ErrRecordNotFound) {
 		return err
 	}
 
+	log := slog.With("domain", domain)
 	switch {
 	case record == nil:
-		slog.Info("Creating record", "domain", conf.Domain, "value", ip)
+		log.Info("Creating record", "content", ip)
 		_, err := client.DNS.Records.New(ctx, dns.RecordNewParams{
 			ZoneID: cloudflare.F(zone.ID),
-			Record: newAParam(conf.Domain, ip, conf.Proxied, dns.TTL(conf.TTL)),
+			Record: newAParam(domain, ip, conf.Proxied, dns.TTL(conf.TTL)),
 		})
 		return err
 	case record.Content != ip:
-		slog.Info("Updating record", "domain", conf.Domain, "from", record.Content, "to", ip)
+		log.Info("Updating record", "previous", record.Content, "content", ip)
 		_, err := client.DNS.Records.Update(ctx, record.ID, dns.RecordUpdateParams{
 			ZoneID: cloudflare.F(zone.ID),
-			Record: newAParam(conf.Domain, ip, conf.Proxied, dns.TTL(conf.TTL)),
+			Record: newAParam(domain, ip, conf.Proxied, dns.TTL(conf.TTL)),
 		})
 		return err
 	default:
-		slog.Info("Record up to date", "domain", conf.Domain, "content", record.Content)
+		log.Info("Record up to date", "content", record.Content)
 		return nil
 	}
 }

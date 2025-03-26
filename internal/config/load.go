@@ -50,7 +50,7 @@ func EnvName(name string) string {
 		return "CF_API_EMAIL"
 	case FlagCloudflareAccountID:
 		return "CF_ACCOUNT_ID"
-	case FlagSource:
+	case FlagSource, FlagDomain:
 		name += "s"
 	}
 	name = strings.ToUpper(name)
