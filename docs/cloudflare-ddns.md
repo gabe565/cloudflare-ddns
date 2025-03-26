@@ -21,6 +21,7 @@ cloudflare-ddns [flags]
       --log-level string       Log level (one of trace, debug, info, warn, error) (default "info")
   -p, --proxied                Enables Cloudflare proxy for the record
   -s, --source strings         Enabled IP sources (supports cloudflare_tls, cloudflare, opendns_tls, opendns, ipinfo, ipify) (default [cloudflare_tls,opendns_tls,ipinfo,ipify,cloudflare,opendns])
+      --timeout duration       Maximum length of time that an update may take (default 1m0s)
   -t, --ttl float              DNS record TTL (default auto)
   -v, --version                version for cloudflare-ddns
 ```

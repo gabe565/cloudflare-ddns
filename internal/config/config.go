@@ -20,6 +20,7 @@ type Config struct {
 	DNSUseTCP  bool
 	Proxied    bool
 	TTL        float64
+	Timeout    time.Duration
 
 	CloudflareToken     string
 	CloudflareKey       string
@@ -29,6 +30,7 @@ type Config struct {
 
 func New() *Config {
 	return &Config{
+		Timeout: time.Minute,
 		SourceStrs: []string{
 			SourceCloudflareTLS.String(),
 			SourceOpenDNSTLS.String(),

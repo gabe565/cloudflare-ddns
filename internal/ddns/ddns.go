@@ -22,6 +22,12 @@ func Update(ctx context.Context, conf *config.Config) error {
 		slog.Debug("Update complete", "took", time.Since(start))
 	}()
 
+	if conf.Timeout != 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, conf.Timeout)
+		defer cancel()
+	}
+
 	ip, err := lookup.GetPublicIP(ctx, conf)
 	if err != nil {
 		return err
