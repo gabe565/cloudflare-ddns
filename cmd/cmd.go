@@ -49,23 +49,18 @@ var (
 )
 
 func run(cmd *cobra.Command, args []string) error {
-	conf, err := config.Load(cmd)
+	conf, err := config.Load(cmd, args)
 	if err != nil {
 		return err
 	}
 
 	switch {
+	case len(conf.Domains) == 0:
+		return ErrDomainRequired
 	case conf.CloudflareToken == "" && conf.CloudflareKey == "":
 		return fmt.Errorf("%w: CF_API_KEY or CF_API_TOKEN is required", ErrCloudflareAuth)
 	case conf.CloudflareKey != "" && conf.CloudflareEmail == "":
 		return fmt.Errorf("%w: CF_API_EMAIL is required", ErrCloudflareAuth)
-	}
-
-	if len(args) != 0 {
-		conf.Domains = args
-	}
-	if len(conf.Domains) == 0 {
-		return ErrDomainRequired
 	}
 
 	cmd.SilenceUsage = true

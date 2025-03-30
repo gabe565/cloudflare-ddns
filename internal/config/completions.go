@@ -32,7 +32,7 @@ func (c *Config) RegisterCompletions(cmd *cobra.Command) {
 }
 
 func CompleteDomain(cmd *cobra.Command, args []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
-	conf, err := Load(cmd)
+	conf, err := Load(cmd, args)
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveError
 	}
@@ -46,7 +46,7 @@ func CompleteDomain(cmd *cobra.Command, args []string, _ string) ([]cobra.Comple
 	iter := client.Zones.ListAutoPaging(cmd.Context(), zones.ZoneListParams{})
 	for iter.Next() {
 		name := iter.Current().Name
-		if !slices.Contains(args, name) {
+		if !slices.Contains(conf.Domains, name) {
 			domains = append(domains, name)
 		}
 	}

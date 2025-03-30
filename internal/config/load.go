@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
-func Load(cmd *cobra.Command) (*Config, error) {
+func Load(cmd *cobra.Command, domains []string) (*Config, error) {
 	conf, ok := FromContext(cmd.Context())
 	if !ok {
 		panic("command missing config")
@@ -31,6 +31,10 @@ func Load(cmd *cobra.Command) (*Config, error) {
 
 	if err := conf.verifySources(); err != nil {
 		return nil, err
+	}
+
+	if len(domains) != 0 {
+		conf.Domains = domains
 	}
 
 	conf.InitLog(cmd.ErrOrStderr())
