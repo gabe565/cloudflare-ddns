@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
-	"sync"
 	"time"
 
 	"gabe565.com/cloudflare-ddns/internal/config"
+	"gabe565.com/cloudflare-ddns/internal/errsgroup"
 	"gabe565.com/cloudflare-ddns/internal/lookup"
 	"github.com/cloudflare/cloudflare-go/v4"
 	"github.com/cloudflare/cloudflare-go/v4/dns"
@@ -25,34 +25,26 @@ func Update(ctx context.Context, conf *config.Config) error {
 		defer cancel()
 	}
 
-	ip, err := lookup.GetPublicIP(ctx, conf)
+	publicIP, err := lookup.GetPublicIP(ctx, conf)
 	if err != nil {
 		return err
 	}
-	slog.Debug("Got public IP", "ip", ip)
+	slog.Debug("Got public IP", "ip", publicIP)
 
 	client, err := conf.NewCloudflareClient()
 	if err != nil {
 		return err
 	}
 
-	var errs []error
-	var wg sync.WaitGroup
-	var mu sync.Mutex
-	for _, domain := range conf.Domains {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			if err := updateDomain(ctx, conf, client, domain, ip); err != nil {
-				mu.Lock()
-				errs = append(errs, err)
-				mu.Unlock()
-			}
-		}()
-	}
-	wg.Wait()
+	var group errsgroup.Group
 
-	if err := errors.Join(errs...); err != nil {
+	for _, domain := range conf.Domains {
+		group.Go(func() error {
+			return updateDomain(ctx, conf, client, domain, publicIP)
+		})
+	}
+
+	if err := group.Wait(); err != nil {
 		slog.Debug("Update failed", "took", time.Since(start), "error", err)
 		return err
 	}
@@ -61,34 +53,52 @@ func Update(ctx context.Context, conf *config.Config) error {
 	return nil
 }
 
-func updateDomain(ctx context.Context, conf *config.Config, client *cloudflare.Client, domain, ip string) error {
+func updateDomain(ctx context.Context, conf *config.Config, client *cloudflare.Client, domain string, ip lookup.Response) error {
 	zone, err := FindZone(ctx, client, conf.CloudflareZoneListParams(), domain)
 	if err != nil {
 		return err
 	}
 
-	record, err := GetRecord(ctx, client, zone, domain)
+	v4, v6, err := GetRecords(ctx, client, zone, domain)
 	if err != nil && !errors.Is(err, ErrRecordNotFound) {
 		return err
 	}
 
-	log := slog.With("domain", domain)
+	var group errsgroup.Group
+
+	if conf.UseV4 {
+		group.Go(func() error {
+			return updateRecord(ctx, conf, client, zone, dns.RecordTypeA, v4, domain, ip.IPV4)
+		})
+	}
+
+	if conf.UseV6 {
+		group.Go(func() error {
+			return updateRecord(ctx, conf, client, zone, dns.RecordTypeAAAA, v6, domain, ip.IPV6)
+		})
+	}
+
+	return group.Wait()
+}
+
+func updateRecord(ctx context.Context, conf *config.Config, client *cloudflare.Client, zone *zones.Zone, recordType dns.RecordType, record *dns.RecordResponse, domain, content string) error {
+	log := slog.With("type", recordType, "domain", domain)
 	switch {
 	case record == nil:
-		log.Info("Creating record", "content", ip)
+		log.Info("Creating record", "content", content)
 		if !conf.DryRun {
 			_, err := client.DNS.Records.New(ctx, dns.RecordNewParams{
 				ZoneID: cloudflare.F(zone.ID),
-				Record: newAParam(domain, ip, conf.Proxied, dns.TTL(conf.TTL)),
+				Record: newRecordParam(recordType, domain, content, conf.Proxied, dns.TTL(conf.TTL)),
 			})
 			return err
 		}
-	case record.Content != ip:
-		log.Info("Updating record", "previous", record.Content, "content", ip)
+	case record.Content != content:
+		log.Info("Updating record", "previous", record.Content, "content", content)
 		if !conf.DryRun {
 			_, err := client.DNS.Records.Update(ctx, record.ID, dns.RecordUpdateParams{
 				ZoneID: cloudflare.F(zone.ID),
-				Record: newAParam(domain, ip, conf.Proxied, dns.TTL(conf.TTL)),
+				Record: newRecordParam(recordType, domain, content, conf.Proxied, dns.TTL(conf.TTL)),
 			})
 			return err
 		}
@@ -120,39 +130,43 @@ var (
 	ErrUnsupportedRecordType = errors.New("unsupported record type")
 )
 
-func GetRecord(ctx context.Context, client *cloudflare.Client, zone *zones.Zone, domain string) (*dns.RecordResponse, error) {
+func GetRecords(ctx context.Context, client *cloudflare.Client, zone *zones.Zone, domain string) (*dns.RecordResponse, *dns.RecordResponse, error) {
 	iter := client.DNS.Records.ListAutoPaging(ctx, dns.RecordListParams{
 		ZoneID: cloudflare.F(zone.ID),
 		Name: cloudflare.F(dns.RecordListParamsName{
 			Exact: cloudflare.F(domain),
 		}),
 	})
+	var v4, v6 *dns.RecordResponse
 	for iter.Next() {
 		v := iter.Current()
 		switch v.Type {
 		case dns.RecordResponseTypeA:
-			slog.Debug("Found record", "name", v.Name, "id", v.ID, "content", v.Content)
-			return &v, nil
+			slog.Debug("Found A record", "name", v.Name, "type", v.Type, "id", v.ID, "content", v.Content)
+			v4 = &v
+		case dns.RecordResponseTypeAAAA:
+			slog.Debug("Found AAAA record", "name", v.Name, "type", v.Type, "id", v.ID, "content", v.Content)
+			v6 = &v
 		case dns.RecordResponseTypeCNAME:
-			return nil, fmt.Errorf("%w: %s", ErrUnsupportedRecordType, v.Type)
+			return nil, nil, fmt.Errorf("%w: %s", ErrUnsupportedRecordType, v.Type)
 		}
 	}
 	if iter.Err() != nil {
-		return nil, iter.Err()
+		return nil, nil, iter.Err()
 	}
-	return nil, fmt.Errorf("%w: %s", ErrRecordNotFound, domain)
+	return v4, v6, fmt.Errorf("%w: %s", ErrRecordNotFound, domain)
 }
 
-func newAParam(domain, content string, proxied bool, ttl dns.TTL) dns.ARecordParam {
+func newRecordParam(recordType dns.RecordType, domain, content string, proxied bool, ttl dns.TTL) dns.RecordParam {
 	if ttl == 0 {
 		ttl = dns.TTL1
 	}
-	return dns.ARecordParam{
+	return dns.RecordParam{
 		Comment: cloudflare.F("DDNS record managed by gabe565/cloudflare-ddns"),
 		Content: cloudflare.F(content),
 		Name:    cloudflare.F(domain),
 		Proxied: cloudflare.F(proxied),
 		TTL:     cloudflare.F(ttl),
-		Type:    cloudflare.F(dns.ARecordTypeA),
+		Type:    cloudflare.F(recordType),
 	}
 }

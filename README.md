@@ -13,6 +13,7 @@ Cloudflare DDNS is a command-line tool that keeps a Cloudflare DNS record in syn
   - [ipify.org](https://ipify.org)
   - Cloudflare DNS (using `whoami.cloudflare`)
   - OpenDNS (using `myip.opendns.com`)
+- **Future Compatibility:** Supports managing A and AAAA records.
 - **Flexible Usage:** Run as a one-off command for use with cron/systemd/Kubernetes, or as a daemon with a configurable update interval.
 - **Simple Authentication:** Use either `CF_API_TOKEN` or `CF_API_KEY` with `CF_API_EMAIL` to securely connect to the Cloudflare API.
 

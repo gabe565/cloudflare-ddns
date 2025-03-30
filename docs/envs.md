@@ -10,6 +10,8 @@
 | `DDNS_DOMAINS` | Domains to manage | ` ` |
 | `DDNS_DRY_RUN` | Runs without changing any records | `false` |
 | `DDNS_INTERVAL` | Update interval | `0s` |
+| `DDNS_IPV4` | Enables A records | `true` |
+| `DDNS_IPV6` | Enables AAAA records | `false` |
 | `DDNS_LOG_FORMAT` | Log format (one of auto, color, plain, json) | `auto` |
 | `DDNS_LOG_LEVEL` | Log level (one of trace, debug, info, warn, error) | `info` |
 | `DDNS_PROXIED` | Enables Cloudflare proxy for the record | `false` |

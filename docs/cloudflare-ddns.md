@@ -18,6 +18,8 @@ cloudflare-ddns [flags]
   -n, --dry-run                Runs without changing any records
   -h, --help                   help for cloudflare-ddns
   -i, --interval duration      Update interval
+  -4, --ipv4                   Enables A records (default true)
+  -6, --ipv6                   Enables AAAA records
       --log-format string      Log format (one of auto, color, plain, json) (default "auto")
       --log-level string       Log level (one of trace, debug, info, warn, error) (default "info")
   -p, --proxied                Enables Cloudflare proxy for the record

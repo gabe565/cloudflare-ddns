@@ -14,6 +14,8 @@ type Config struct {
 	LogFormat slogx.Format
 
 	SourceStrs []string
+	UseV4      bool
+	UseV6      bool
 	Domains    []string
 	Interval   time.Duration
 	DNSUseTCP  bool
@@ -30,6 +32,7 @@ type Config struct {
 
 func New() *Config {
 	return &Config{
+		UseV4:   true,
 		Timeout: time.Minute,
 		SourceStrs: []string{
 			SourceCloudflareTLS.String(),

@@ -6,15 +6,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 	"time"
 
+	"gabe565.com/cloudflare-ddns/internal/errsgroup"
 	"gabe565.com/utils/slogx"
 )
 
 var ErrUpstreamStatus = errors.New("upstream error")
 
-func HTTPPlain(ctx context.Context, url string, unquote bool) (string, error) {
+func HTTPPlain(ctx context.Context, url string) (string, error) {
 	start := time.Now()
 	slogx.Trace("HTTP request", "url", url)
 
@@ -43,16 +43,53 @@ func HTTPPlain(ctx context.Context, url string, unquote bool) (string, error) {
 		return "", fmt.Errorf("%w: %s", ErrUpstreamStatus, res.Status)
 	}
 
-	if unquote {
-		return strconv.Unquote(string(b))
-	}
 	return string(b), nil
 }
 
-func IPInfo(ctx context.Context) (string, error) {
-	return HTTPPlain(ctx, "https://ipinfo.io/ip", false)
+func IPInfo(ctx context.Context, v4, v6 bool) (Response, error) {
+	var response Response
+	var group errsgroup.Group
+
+	if v4 {
+		group.Go(func() error {
+			var err error
+			response.IPV4, err = HTTPPlain(ctx, "https://ipinfo.io/ip")
+			return err
+		})
+	}
+
+	if v6 {
+		group.Go(func() error {
+			var err error
+			response.IPV6, err = HTTPPlain(ctx, "https://v6.ipinfo.io/ip")
+			return err
+		})
+	}
+
+	err := group.Wait()
+	return response, err
 }
 
-func IPify(ctx context.Context) (string, error) {
-	return HTTPPlain(ctx, "https://api.ipify.org", false)
+func IPify(ctx context.Context, v4, v6 bool) (Response, error) {
+	var response Response
+	var group errsgroup.Group
+
+	if v4 {
+		group.Go(func() error {
+			var err error
+			response.IPV4, err = HTTPPlain(ctx, "https://api.ipify.org")
+			return err
+		})
+	}
+
+	if v6 {
+		group.Go(func() error {
+			var err error
+			response.IPV6, err = HTTPPlain(ctx, "https://api6.ipify.org")
+			return err
+		})
+	}
+
+	err := group.Wait()
+	return response, err
 }

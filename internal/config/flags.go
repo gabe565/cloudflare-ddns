@@ -12,6 +12,8 @@ const (
 	FlagLogFormat = "log-format"
 
 	FlagSource    = "source"
+	FlagIPV4      = "ipv4"
+	FlagIPV6      = "ipv6"
 	FlagDomain    = "domain"
 	FlagInterval  = "interval"
 	FlagDNSUseTCP = "dns-tcp"
@@ -33,6 +35,8 @@ func (c *Config) RegisterFlags(cmd *cobra.Command) {
 	fs.Var(&c.LogFormat, FlagLogFormat, "Log format (one of "+strings.Join(slogx.FormatStrings(), ", ")+")")
 
 	fs.StringSliceVarP(&c.SourceStrs, FlagSource, "s", c.SourceStrs, "Enabled IP sources (supports "+strings.Join(SourceStrings(), ", ")+")")
+	fs.BoolVarP(&c.UseV4, FlagIPV4, "4", c.UseV4, "Enables A records")
+	fs.BoolVarP(&c.UseV6, FlagIPV6, "6", c.UseV6, "Enables AAAA records")
 	fs.StringSliceVarP(&c.Domains, FlagDomain, "d", c.Domains, "Domains to manage")
 	fs.DurationVarP(&c.Interval, FlagInterval, "i", c.Interval, "Update interval")
 	fs.BoolVarP(&c.Proxied, FlagProxied, "p", c.Proxied, "Enables Cloudflare proxy for the record")

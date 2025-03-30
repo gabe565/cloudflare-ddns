@@ -3,45 +3,42 @@ package lookup
 import (
 	"context"
 	"errors"
+	"net"
 	"time"
 
+	"gabe565.com/cloudflare-ddns/internal/errsgroup"
 	"gabe565.com/utils/slogx"
 	"github.com/miekg/dns"
 )
 
-type lookupDNSOptions struct {
-	server string
-	useTCP bool
-	useTLS bool
-	req    dns.Question
-}
-
-func (l lookupDNSOptions) net() string {
-	switch {
-	case l.useTLS:
-		return "tcp-tls"
-	case l.useTCP:
-		return "tcp"
-	default:
-		return ""
-	}
-}
-
 var ErrNoDNSAnswer = errors.New("no DNS answer")
 
-func lookupDNS(ctx context.Context, opts lookupDNSOptions) (string, error) {
+func lookupDNS(ctx context.Context, host, port string, tcp, tls bool, question dns.Question) (string, error) {
 	start := time.Now()
-	c := &dns.Client{Net: opts.net()}
-	m := &dns.Msg{Question: []dns.Question{opts.req}}
+	c := &dns.Client{}
+	switch {
+	case tls:
+		c.Net = "tcp-tls"
+	case tcp:
+		c.Net = "tcp"
+	}
+	m := &dns.Msg{Question: []dns.Question{question}}
 
-	slogx.Trace("DNS query", "server", opts.server, "net", c.Net, "name", opts.req.Name, "type", dns.TypeToString[opts.req.Qtype], "class", dns.ClassToString[opts.req.Qclass])
+	server := net.JoinHostPort(host, port)
+	slogx.Trace("DNS query",
+		"server", server,
+		"net", c.Net,
+		"name", question.Name,
+		"type", dns.TypeToString[question.Qtype],
+		"class", dns.ClassToString[question.Qclass],
+	)
 
-	res, _, err := c.ExchangeContext(ctx, m, opts.server)
+	res, _, err := c.ExchangeContext(ctx, m, server)
 	if err != nil {
 		return "", err
 	}
 
-	slogx.Trace("DNS response", "took", time.Since(start), "server", opts.server, "response", res)
+	slogx.Trace("DNS response", "took", time.Since(start), "server", server, "response", res)
 
 	if len(res.Answer) == 0 {
 		return "", ErrNoDNSAnswer
@@ -51,6 +48,8 @@ func lookupDNS(ctx context.Context, opts lookupDNSOptions) (string, error) {
 	switch answer := res.Answer[0].(type) {
 	case *dns.A:
 		val = answer.A.String()
+	case *dns.AAAA:
+		val = answer.AAAA.String()
 	case *dns.TXT:
 		if len(answer.Txt) == 0 {
 			return "", ErrNoDNSAnswer
@@ -60,36 +59,74 @@ func lookupDNS(ctx context.Context, opts lookupDNSOptions) (string, error) {
 	return val, nil
 }
 
-func Cloudflare(ctx context.Context, tls, tcp bool) (string, error) {
-	server := "1.1.1.1:53"
+func Cloudflare(ctx context.Context, tls, tcp, v4, v6 bool) (Response, error) {
+	port := "53"
 	if tls {
-		server = "1.1.1.1:853"
+		port = "853"
 	}
-	return lookupDNS(ctx, lookupDNSOptions{
-		server: server,
-		useTLS: tls,
-		useTCP: tcp,
-		req: dns.Question{
-			Name:   "whoami.cloudflare.",
-			Qtype:  dns.TypeTXT,
-			Qclass: dns.ClassCHAOS,
-		},
-	})
+
+	question := dns.Question{
+		Name:   "whoami.cloudflare.",
+		Qtype:  dns.TypeTXT,
+		Qclass: dns.ClassCHAOS,
+	}
+
+	var response Response
+	var group errsgroup.Group
+
+	if v4 {
+		group.Go(func() error {
+			var err error
+			response.IPV4, err = lookupDNS(ctx, "1.1.1.1", port, tcp, tls, question)
+			return err
+		})
+	}
+
+	if v6 {
+		group.Go(func() error {
+			var err error
+			response.IPV6, err = lookupDNS(ctx, "2606:4700:4700::1111", port, tcp, tls, question)
+			return err
+		})
+	}
+
+	err := group.Wait()
+	return response, err
 }
 
-func OpenDNS(ctx context.Context, tls, tcp bool) (string, error) {
-	server := "dns.opendns.com:53"
+func OpenDNS(ctx context.Context, tls, tcp, v4, v6 bool) (Response, error) {
+	port := "53"
 	if tls {
-		server = "dns.opendns.com:853"
+		port = "853"
 	}
-	return lookupDNS(ctx, lookupDNSOptions{
-		server: server,
-		useTLS: tls,
-		useTCP: tcp,
-		req: dns.Question{
-			Name:   "myip.opendns.com.",
-			Qtype:  dns.TypeA,
-			Qclass: dns.ClassANY,
-		},
-	})
+
+	var response Response
+	var group errsgroup.Group
+
+	if v4 {
+		group.Go(func() error {
+			var err error
+			response.IPV4, err = lookupDNS(ctx, "208.67.222.222", port, tcp, tls, dns.Question{
+				Name:   "myip.opendns.com.",
+				Qtype:  dns.TypeA,
+				Qclass: dns.ClassANY,
+			})
+			return err
+		})
+	}
+
+	if v6 {
+		group.Go(func() error {
+			var err error
+			response.IPV6, err = lookupDNS(ctx, "2620:119:35::35", port, tcp, tls, dns.Question{
+				Name:   "myip.opendns.com.",
+				Qtype:  dns.TypeAAAA,
+				Qclass: dns.ClassANY,
+			})
+			return err
+		})
+	}
+
+	err := group.Wait()
+	return response, err
 }
