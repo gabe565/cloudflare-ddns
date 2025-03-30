@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"time"
 
@@ -14,7 +15,7 @@ import (
 
 var ErrUpstreamStatus = errors.New("upstream error")
 
-func httpPlain(ctx context.Context, url string) (string, error) {
+func httpPlain(ctx context.Context, network, url string) (string, error) {
 	start := time.Now()
 	slogx.Trace("HTTP request", "url", url)
 
@@ -23,7 +24,14 @@ func httpPlain(ctx context.Context, url string) (string, error) {
 		return "", err
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	dialer := net.Dialer{}
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.DialContext = func(ctx context.Context, _, addr string) (net.Conn, error) {
+		return dialer.DialContext(ctx, network, addr)
+	}
+	client := http.Client{Transport: transport}
+
+	res, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -48,21 +56,21 @@ func httpPlain(ctx context.Context, url string) (string, error) {
 
 func ICanHazIP(ctx context.Context, v4, v6 bool) (Response, error) {
 	return lookupV4V6(v4, v6,
-		func() (string, error) { return httpPlain(ctx, "https://ipv4.icanhazip.com") },
-		func() (string, error) { return httpPlain(ctx, "https://ipv6.icanhazip.com") },
+		func() (string, error) { return httpPlain(ctx, "tcp4", "https://ipv4.icanhazip.com") },
+		func() (string, error) { return httpPlain(ctx, "tcp6", "https://ipv6.icanhazip.com") },
 	)
 }
 
 func IPInfo(ctx context.Context, v4, v6 bool) (Response, error) {
 	return lookupV4V6(v4, v6,
-		func() (string, error) { return httpPlain(ctx, "https://ipinfo.io/ip") },
-		func() (string, error) { return httpPlain(ctx, "https://v6.ipinfo.io/ip") },
+		func() (string, error) { return httpPlain(ctx, "tcp4", "https://ipinfo.io/ip") },
+		func() (string, error) { return httpPlain(ctx, "tcp6", "https://v6.ipinfo.io/ip") },
 	)
 }
 
 func IPify(ctx context.Context, v4, v6 bool) (Response, error) {
 	return lookupV4V6(v4, v6,
-		func() (string, error) { return httpPlain(ctx, "https://api.ipify.org") },
-		func() (string, error) { return httpPlain(ctx, "https://api6.ipify.org") },
+		func() (string, error) { return httpPlain(ctx, "tcp4", "https://api.ipify.org") },
+		func() (string, error) { return httpPlain(ctx, "tcp6", "https://api6.ipify.org") },
 	)
 }

@@ -12,14 +12,27 @@ import (
 
 var ErrNoDNSAnswer = errors.New("no DNS answer")
 
-func lookupDNS(ctx context.Context, host, port string, tcp, tls bool, question dns.Question) (string, error) {
+func lookupDNS(ctx context.Context, host, port string, tcp, ipv6, tls bool, question dns.Question) (string, error) {
 	start := time.Now()
 	c := &dns.Client{}
-	switch {
-	case tls:
-		c.Net = "tcp-tls"
-	case tcp:
-		c.Net = "tcp"
+	if ipv6 {
+		switch {
+		case tls:
+			c.Net = "tcp6-tls"
+		case tcp:
+			c.Net = "tcp6"
+		default:
+			c.Net = "udp6"
+		}
+	} else {
+		switch {
+		case tls:
+			c.Net = "tcp4-tls"
+		case tcp:
+			c.Net = "tcp4"
+		default:
+			c.Net = "udp4"
+		}
 	}
 	m := &dns.Msg{Question: []dns.Question{question}}
 
@@ -71,8 +84,8 @@ func Cloudflare(ctx context.Context, tls, tcp, v4, v6 bool) (Response, error) {
 	}
 
 	return lookupV4V6(v4, v6,
-		func() (string, error) { return lookupDNS(ctx, "1.1.1.1", port, tcp, tls, question) },
-		func() (string, error) { return lookupDNS(ctx, "2606:4700:4700::1111", port, tcp, tls, question) },
+		func() (string, error) { return lookupDNS(ctx, "one.one.one.one", port, tcp, false, tls, question) },
+		func() (string, error) { return lookupDNS(ctx, "one.one.one.one", port, tcp, true, tls, question) },
 	)
 }
 
@@ -84,14 +97,14 @@ func OpenDNS(ctx context.Context, tls, tcp, v4, v6 bool) (Response, error) {
 
 	return lookupV4V6(v4, v6,
 		func() (string, error) {
-			return lookupDNS(ctx, "208.67.222.222", port, tcp, tls, dns.Question{
+			return lookupDNS(ctx, "dns.opendns.com", port, tcp, false, tls, dns.Question{
 				Name:   "myip.opendns.com.",
 				Qtype:  dns.TypeA,
 				Qclass: dns.ClassANY,
 			})
 		},
 		func() (string, error) {
-			return lookupDNS(ctx, "2620:119:35::35", port, tcp, tls, dns.Question{
+			return lookupDNS(ctx, "dns.opendns.com", port, tcp, true, tls, dns.Question{
 				Name:   "myip.opendns.com.",
 				Qtype:  dns.TypeAAAA,
 				Qclass: dns.ClassANY,
