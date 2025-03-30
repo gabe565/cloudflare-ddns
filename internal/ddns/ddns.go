@@ -62,7 +62,7 @@ func Update(ctx context.Context, conf *config.Config) error {
 }
 
 func updateDomain(ctx context.Context, conf *config.Config, client *cloudflare.Client, domain, ip string) error {
-	zone, err := FindZone(ctx, client, conf.CloudflareAccountID, domain)
+	zone, err := FindZone(ctx, client, conf.CloudflareZoneListParams(), domain)
 	if err != nil {
 		return err
 	}
@@ -96,14 +96,7 @@ func updateDomain(ctx context.Context, conf *config.Config, client *cloudflare.C
 
 var ErrZoneNotFound = errors.New("zone not found")
 
-func FindZone(ctx context.Context, client *cloudflare.Client, accountID, domain string) (*zones.Zone, error) {
-	params := zones.ZoneListParams{}
-	if accountID != "" {
-		params.Account = cloudflare.F(zones.ZoneListParamsAccount{
-			ID: cloudflare.F(accountID),
-		})
-	}
-
+func FindZone(ctx context.Context, client *cloudflare.Client, params zones.ZoneListParams, domain string) (*zones.Zone, error) {
 	iter := client.Zones.ListAutoPaging(ctx, params)
 	for iter.Next() {
 		v := iter.Current()

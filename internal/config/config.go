@@ -6,6 +6,7 @@ import (
 	"gabe565.com/utils/slogx"
 	"github.com/cloudflare/cloudflare-go/v4"
 	"github.com/cloudflare/cloudflare-go/v4/option"
+	"github.com/cloudflare/cloudflare-go/v4/zones"
 )
 
 type Config struct {
@@ -53,6 +54,16 @@ func (c *Config) NewCloudflareClient() (*cloudflare.Client, error) {
 	}
 
 	return cloudflare.NewClient(opts...), nil
+}
+
+func (c *Config) CloudflareZoneListParams() zones.ZoneListParams {
+	var params zones.ZoneListParams
+	if c.CloudflareAccountID != "" {
+		params.Account = cloudflare.F(zones.ZoneListParamsAccount{
+			ID: cloudflare.F(c.CloudflareAccountID),
+		})
+	}
+	return params
 }
 
 func (c *Config) Sources() ([]Source, error) {
