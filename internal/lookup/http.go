@@ -1,6 +1,7 @@
 package lookup
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -43,7 +44,31 @@ func HTTPPlain(ctx context.Context, url string) (string, error) {
 		return "", fmt.Errorf("%w: %s", ErrUpstreamStatus, res.Status)
 	}
 
-	return string(b), nil
+	return string(bytes.TrimSpace(b)), nil
+}
+
+func ICanHazIP(ctx context.Context, v4, v6 bool) (Response, error) {
+	var response Response
+	var group errsgroup.Group
+
+	if v4 {
+		group.Go(func() error {
+			var err error
+			response.IPV4, err = HTTPPlain(ctx, "https://ipv4.icanhazip.com")
+			return err
+		})
+	}
+
+	if v6 {
+		group.Go(func() error {
+			var err error
+			response.IPV6, err = HTTPPlain(ctx, "https://ipv6.icanhazip.com")
+			return err
+		})
+	}
+
+	err := group.Wait()
+	return response, err
 }
 
 func IPInfo(ctx context.Context, v4, v6 bool) (Response, error) {

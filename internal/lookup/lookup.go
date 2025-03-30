@@ -47,6 +47,8 @@ func GetPublicIP(ctx context.Context, conf *config.Config) (Response, error) {
 			response, err = OpenDNS(ctx, true, conf.DNSUseTCP, conf.UseV4, conf.UseV6)
 		case config.SourceOpenDNS:
 			response, err = OpenDNS(ctx, false, conf.DNSUseTCP, conf.UseV4, conf.UseV6)
+		case config.SourceICanHazIP:
+			response, err = ICanHazIP(ctx, conf.UseV4, conf.UseV6)
 		case config.SourceIPInfo:
 			response, err = IPInfo(ctx, conf.UseV4, conf.UseV6)
 		case config.SourceIPify:

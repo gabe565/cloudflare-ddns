@@ -15,6 +15,6 @@
 | `DDNS_LOG_FORMAT` | Log format (one of auto, color, plain, json) | `auto` |
 | `DDNS_LOG_LEVEL` | Log level (one of trace, debug, info, warn, error) | `info` |
 | `DDNS_PROXIED` | Enables Cloudflare proxy for the record | `false` |
-| `DDNS_SOURCES` | Enabled IP sources (supports cloudflare_tls, cloudflare, opendns_tls, opendns, ipinfo, ipify) | `cloudflare_tls,opendns_tls,ipinfo,ipify,cloudflare,opendns` |
+| `DDNS_SOURCES` | Enabled IP sources (supports cloudflare_tls, cloudflare, opendns_tls, opendns, icanhazip, ipinfo, ipify) | `cloudflare_tls,opendns_tls,icanhazip,ipinfo,ipify,cloudflare,opendns` |
 | `DDNS_TIMEOUT` | Maximum length of time that an update may take | `1m0s` |
 | `DDNS_TTL` | DNS record TTL (default auto) | `0` |

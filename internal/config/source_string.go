@@ -7,11 +7,11 @@ import (
 	"strings"
 )
 
-const _SourceName = "cloudflare_tlscloudflareopendns_tlsopendnsipinfoipify"
+const _SourceName = "cloudflare_tlscloudflareopendns_tlsopendnsicanhazipipinfoipify"
 
-var _SourceIndex = [...]uint8{0, 14, 24, 35, 42, 48, 53}
+var _SourceIndex = [...]uint8{0, 14, 24, 35, 42, 51, 57, 62}
 
-const _SourceLowerName = "cloudflare_tlscloudflareopendns_tlsopendnsipinfoipify"
+const _SourceLowerName = "cloudflare_tlscloudflareopendns_tlsopendnsicanhazipipinfoipify"
 
 func (i Source) String() string {
 	if i >= Source(len(_SourceIndex)-1) {
@@ -28,11 +28,12 @@ func _SourceNoOp() {
 	_ = x[SourceCloudflare-(1)]
 	_ = x[SourceOpenDNSTLS-(2)]
 	_ = x[SourceOpenDNS-(3)]
-	_ = x[SourceIPInfo-(4)]
-	_ = x[SourceIPify-(5)]
+	_ = x[SourceICanHazIP-(4)]
+	_ = x[SourceIPInfo-(5)]
+	_ = x[SourceIPify-(6)]
 }
 
-var _SourceValues = []Source{SourceCloudflareTLS, SourceCloudflare, SourceOpenDNSTLS, SourceOpenDNS, SourceIPInfo, SourceIPify}
+var _SourceValues = []Source{SourceCloudflareTLS, SourceCloudflare, SourceOpenDNSTLS, SourceOpenDNS, SourceICanHazIP, SourceIPInfo, SourceIPify}
 
 var _SourceNameToValueMap = map[string]Source{
 	_SourceName[0:14]:       SourceCloudflareTLS,
@@ -43,10 +44,12 @@ var _SourceNameToValueMap = map[string]Source{
 	_SourceLowerName[24:35]: SourceOpenDNSTLS,
 	_SourceName[35:42]:      SourceOpenDNS,
 	_SourceLowerName[35:42]: SourceOpenDNS,
-	_SourceName[42:48]:      SourceIPInfo,
-	_SourceLowerName[42:48]: SourceIPInfo,
-	_SourceName[48:53]:      SourceIPify,
-	_SourceLowerName[48:53]: SourceIPify,
+	_SourceName[42:51]:      SourceICanHazIP,
+	_SourceLowerName[42:51]: SourceICanHazIP,
+	_SourceName[51:57]:      SourceIPInfo,
+	_SourceLowerName[51:57]: SourceIPInfo,
+	_SourceName[57:62]:      SourceIPify,
+	_SourceLowerName[57:62]: SourceIPify,
 }
 
 var _SourceNames = []string{
@@ -54,8 +57,9 @@ var _SourceNames = []string{
 	_SourceName[14:24],
 	_SourceName[24:35],
 	_SourceName[35:42],
-	_SourceName[42:48],
-	_SourceName[48:53],
+	_SourceName[42:51],
+	_SourceName[51:57],
+	_SourceName[57:62],
 }
 
 // SourceString retrieves an enum value from the enum constants string name.

@@ -9,6 +9,7 @@ Cloudflare DDNS is a command-line tool that keeps a Cloudflare DNS record in syn
 - **Multiple IP Sources:** Tries multiple sources in order for fetching your public IP:
   - Cloudflare DNS (TLS) (using `whoami.cloudflare`)
   - OpenDNS (TLS) (using `myip.opendns.com`)
+  - [icanhazip.com](https://icanhazip.com)
   - [ipinfo.io](https://ipinfo.io)
   - [ipify.org](https://ipify.org)
   - Cloudflare DNS (using `whoami.cloudflare`)

@@ -9,6 +9,7 @@ const (
 	SourceCloudflare
 	SourceOpenDNSTLS // opendns_tls
 	SourceOpenDNS    // opendns
+	SourceICanHazIP  // icanhazip
 	SourceIPInfo     // ipinfo
 	SourceIPify      // ipify
 )

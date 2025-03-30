@@ -37,6 +37,7 @@ func New() *Config {
 		SourceStrs: []string{
 			SourceCloudflareTLS.String(),
 			SourceOpenDNSTLS.String(),
+			SourceICanHazIP.String(),
 			SourceIPInfo.String(),
 			SourceIPify.String(),
 			SourceCloudflare.String(),
