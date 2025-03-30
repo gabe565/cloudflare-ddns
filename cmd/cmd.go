@@ -53,6 +53,10 @@ func run(cmd *cobra.Command, args []string) error {
 
 	cmd.SilenceUsage = true
 
+	if conf.DryRun {
+		slog.Warn("Running in dry run mode")
+	}
+
 	if conf.Interval != 0 {
 		slog.Info("Cloudflare DDNS", "version", cobrax.GetVersion(cmd), "commit", cobrax.GetCommit(cmd))
 	}

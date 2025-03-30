@@ -8,6 +8,7 @@
 | `CF_API_TOKEN` | Cloudflare API token (recommended) | ` ` |
 | `DDNS_DNS_TCP` | Force DNS to use TCP | `false` |
 | `DDNS_DOMAINS` | Domains to manage | ` ` |
+| `DDNS_DRY_RUN` | Runs without changing any records | `false` |
 | `DDNS_INTERVAL` | Update interval | `0s` |
 | `DDNS_LOG_FORMAT` | Log format (one of auto, color, plain, json) | `auto` |
 | `DDNS_LOG_LEVEL` | Log level (one of trace, debug, info, warn, error) | `info` |

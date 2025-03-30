@@ -76,22 +76,26 @@ func updateDomain(ctx context.Context, conf *config.Config, client *cloudflare.C
 	switch {
 	case record == nil:
 		log.Info("Creating record", "content", ip)
-		_, err := client.DNS.Records.New(ctx, dns.RecordNewParams{
-			ZoneID: cloudflare.F(zone.ID),
-			Record: newAParam(domain, ip, conf.Proxied, dns.TTL(conf.TTL)),
-		})
-		return err
+		if !conf.DryRun {
+			_, err := client.DNS.Records.New(ctx, dns.RecordNewParams{
+				ZoneID: cloudflare.F(zone.ID),
+				Record: newAParam(domain, ip, conf.Proxied, dns.TTL(conf.TTL)),
+			})
+			return err
+		}
 	case record.Content != ip:
 		log.Info("Updating record", "previous", record.Content, "content", ip)
-		_, err := client.DNS.Records.Update(ctx, record.ID, dns.RecordUpdateParams{
-			ZoneID: cloudflare.F(zone.ID),
-			Record: newAParam(domain, ip, conf.Proxied, dns.TTL(conf.TTL)),
-		})
-		return err
+		if !conf.DryRun {
+			_, err := client.DNS.Records.Update(ctx, record.ID, dns.RecordUpdateParams{
+				ZoneID: cloudflare.F(zone.ID),
+				Record: newAParam(domain, ip, conf.Proxied, dns.TTL(conf.TTL)),
+			})
+			return err
+		}
 	default:
 		log.Info("Record up to date", "content", record.Content)
-		return nil
 	}
+	return nil
 }
 
 var ErrZoneNotFound = errors.New("zone not found")

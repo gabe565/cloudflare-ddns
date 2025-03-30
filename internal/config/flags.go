@@ -18,6 +18,7 @@ const (
 	FlagProxied   = "proxied"
 	FlagTTL       = "ttl"
 	FlagTimeout   = "timeout"
+	FlagDryRun    = "dry-run"
 
 	FlagCloudflareToken     = "cf-api-token" //nolint:gosec
 	FlagCloudflareKey       = "cf-api-key"
@@ -38,6 +39,7 @@ func (c *Config) RegisterFlags(cmd *cobra.Command) {
 	fs.Float64VarP(&c.TTL, FlagTTL, "t", c.TTL, "DNS record TTL (default auto)")
 	fs.BoolVar(&c.DNSUseTCP, FlagDNSUseTCP, c.DNSUseTCP, "Force DNS to use TCP")
 	fs.DurationVar(&c.Timeout, FlagTimeout, c.Timeout, "Maximum length of time that an update may take")
+	fs.BoolVarP(&c.DryRun, FlagDryRun, "n", c.DryRun, "Runs without changing any records")
 
 	fs.StringVar(&c.CloudflareToken, FlagCloudflareToken, c.CloudflareToken, "Cloudflare API token (recommended)")
 	fs.StringVar(&c.CloudflareKey, FlagCloudflareKey, c.CloudflareKey, "Cloudflare API key")

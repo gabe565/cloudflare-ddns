@@ -20,6 +20,7 @@ type Config struct {
 	Proxied    bool
 	TTL        float64
 	Timeout    time.Duration
+	DryRun     bool
 
 	CloudflareToken     string
 	CloudflareKey       string

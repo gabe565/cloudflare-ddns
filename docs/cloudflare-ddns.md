@@ -15,6 +15,7 @@ cloudflare-ddns [flags]
       --cf-api-token string    Cloudflare API token (recommended)
       --dns-tcp                Force DNS to use TCP
   -d, --domain strings         Domains to manage
+  -n, --dry-run                Runs without changing any records
   -h, --help                   help for cloudflare-ddns
   -i, --interval duration      Update interval
       --log-format string      Log format (one of auto, color, plain, json) (default "auto")
