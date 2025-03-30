@@ -29,10 +29,6 @@ func Load(cmd *cobra.Command, domains []string) (*Config, error) {
 		return nil, err
 	}
 
-	if err := conf.verifySources(); err != nil {
-		return nil, err
-	}
-
 	if len(domains) != 0 {
 		conf.Domains = domains
 	}

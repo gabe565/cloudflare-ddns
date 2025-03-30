@@ -1,8 +1,6 @@
 package config
 
 import (
-	"errors"
-	"fmt"
 	"time"
 
 	"gabe565.com/utils/slogx"
@@ -55,17 +53,6 @@ func (c *Config) NewCloudflareClient() (*cloudflare.Client, error) {
 	}
 
 	return cloudflare.NewClient(opts...), nil
-}
-
-var ErrInvalidSource = errors.New("invalid source")
-
-func (c *Config) verifySources() error {
-	for _, sourceStr := range c.SourceStrs {
-		if _, err := SourceString(sourceStr); err != nil {
-			return fmt.Errorf("%w: %s", ErrInvalidSource, sourceStr)
-		}
-	}
-	return nil
 }
 
 func (c *Config) Sources() ([]Source, error) {

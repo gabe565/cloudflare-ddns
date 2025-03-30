@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -43,24 +41,14 @@ func New(opts ...cobrax.Option) *cobra.Command {
 	return cmd
 }
 
-var (
-	ErrCloudflareAuth = errors.New("missing Cloudflare auth")
-	ErrDomainRequired = errors.New("domain is required")
-)
-
 func run(cmd *cobra.Command, args []string) error {
 	conf, err := config.Load(cmd, args)
 	if err != nil {
 		return err
 	}
 
-	switch {
-	case len(conf.Domains) == 0:
-		return ErrDomainRequired
-	case conf.CloudflareToken == "" && conf.CloudflareKey == "":
-		return fmt.Errorf("%w: CF_API_KEY or CF_API_TOKEN is required", ErrCloudflareAuth)
-	case conf.CloudflareKey != "" && conf.CloudflareEmail == "":
-		return fmt.Errorf("%w: CF_API_EMAIL is required", ErrCloudflareAuth)
+	if err := conf.Validate(); err != nil {
+		return err
 	}
 
 	cmd.SilenceUsage = true
