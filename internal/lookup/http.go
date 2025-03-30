@@ -9,13 +9,12 @@ import (
 	"net/http"
 	"time"
 
-	"gabe565.com/cloudflare-ddns/internal/errsgroup"
 	"gabe565.com/utils/slogx"
 )
 
 var ErrUpstreamStatus = errors.New("upstream error")
 
-func HTTPPlain(ctx context.Context, url string) (string, error) {
+func httpPlain(ctx context.Context, url string) (string, error) {
 	start := time.Now()
 	slogx.Trace("HTTP request", "url", url)
 
@@ -48,73 +47,22 @@ func HTTPPlain(ctx context.Context, url string) (string, error) {
 }
 
 func ICanHazIP(ctx context.Context, v4, v6 bool) (Response, error) {
-	var response Response
-	var group errsgroup.Group
-
-	if v4 {
-		group.Go(func() error {
-			var err error
-			response.IPV4, err = HTTPPlain(ctx, "https://ipv4.icanhazip.com")
-			return err
-		})
-	}
-
-	if v6 {
-		group.Go(func() error {
-			var err error
-			response.IPV6, err = HTTPPlain(ctx, "https://ipv6.icanhazip.com")
-			return err
-		})
-	}
-
-	err := group.Wait()
-	return response, err
+	return lookupV4V6(v4, v6,
+		func() (string, error) { return httpPlain(ctx, "https://ipv4.icanhazip.com") },
+		func() (string, error) { return httpPlain(ctx, "https://ipv6.icanhazip.com") },
+	)
 }
 
 func IPInfo(ctx context.Context, v4, v6 bool) (Response, error) {
-	var response Response
-	var group errsgroup.Group
-
-	if v4 {
-		group.Go(func() error {
-			var err error
-			response.IPV4, err = HTTPPlain(ctx, "https://ipinfo.io/ip")
-			return err
-		})
-	}
-
-	if v6 {
-		group.Go(func() error {
-			var err error
-			response.IPV6, err = HTTPPlain(ctx, "https://v6.ipinfo.io/ip")
-			return err
-		})
-	}
-
-	err := group.Wait()
-	return response, err
+	return lookupV4V6(v4, v6,
+		func() (string, error) { return httpPlain(ctx, "https://ipinfo.io/ip") },
+		func() (string, error) { return httpPlain(ctx, "https://v6.ipinfo.io/ip") },
+	)
 }
 
 func IPify(ctx context.Context, v4, v6 bool) (Response, error) {
-	var response Response
-	var group errsgroup.Group
-
-	if v4 {
-		group.Go(func() error {
-			var err error
-			response.IPV4, err = HTTPPlain(ctx, "https://api.ipify.org")
-			return err
-		})
-	}
-
-	if v6 {
-		group.Go(func() error {
-			var err error
-			response.IPV6, err = HTTPPlain(ctx, "https://api6.ipify.org")
-			return err
-		})
-	}
-
-	err := group.Wait()
-	return response, err
+	return lookupV4V6(v4, v6,
+		func() (string, error) { return httpPlain(ctx, "https://api.ipify.org") },
+		func() (string, error) { return httpPlain(ctx, "https://api6.ipify.org") },
+	)
 }

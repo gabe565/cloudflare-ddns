@@ -7,6 +7,7 @@ import (
 	"log/slog"
 
 	"gabe565.com/cloudflare-ddns/internal/config"
+	"gabe565.com/cloudflare-ddns/internal/errsgroup"
 	"gabe565.com/utils/slogx"
 )
 
@@ -62,4 +63,28 @@ func GetPublicIP(ctx context.Context, conf *config.Config) (Response, error) {
 		slog.Debug("Source failed", "source", source, "error", err)
 	}
 	return Response{}, fmt.Errorf("%w: %w", ErrAllSourcesFailed, errors.Join(errs...))
+}
+
+func lookupV4V6(v4, v6 bool, v4func, v6func func() (string, error)) (Response, error) {
+	var response Response
+	var group errsgroup.Group
+
+	if v4 {
+		group.Go(func() error {
+			var err error
+			response.IPV4, err = v4func()
+			return err
+		})
+	}
+
+	if v6 {
+		group.Go(func() error {
+			var err error
+			response.IPV6, err = v6func()
+			return err
+		})
+	}
+
+	err := group.Wait()
+	return response, err
 }

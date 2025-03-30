@@ -6,7 +6,6 @@ import (
 	"net"
 	"time"
 
-	"gabe565.com/cloudflare-ddns/internal/errsgroup"
 	"gabe565.com/utils/slogx"
 	"github.com/miekg/dns"
 )
@@ -71,27 +70,10 @@ func Cloudflare(ctx context.Context, tls, tcp, v4, v6 bool) (Response, error) {
 		Qclass: dns.ClassCHAOS,
 	}
 
-	var response Response
-	var group errsgroup.Group
-
-	if v4 {
-		group.Go(func() error {
-			var err error
-			response.IPV4, err = lookupDNS(ctx, "1.1.1.1", port, tcp, tls, question)
-			return err
-		})
-	}
-
-	if v6 {
-		group.Go(func() error {
-			var err error
-			response.IPV6, err = lookupDNS(ctx, "2606:4700:4700::1111", port, tcp, tls, question)
-			return err
-		})
-	}
-
-	err := group.Wait()
-	return response, err
+	return lookupV4V6(v4, v6,
+		func() (string, error) { return lookupDNS(ctx, "1.1.1.1", port, tcp, tls, question) },
+		func() (string, error) { return lookupDNS(ctx, "2606:4700:4700::1111", port, tcp, tls, question) },
+	)
 }
 
 func OpenDNS(ctx context.Context, tls, tcp, v4, v6 bool) (Response, error) {
@@ -100,33 +82,20 @@ func OpenDNS(ctx context.Context, tls, tcp, v4, v6 bool) (Response, error) {
 		port = "853"
 	}
 
-	var response Response
-	var group errsgroup.Group
-
-	if v4 {
-		group.Go(func() error {
-			var err error
-			response.IPV4, err = lookupDNS(ctx, "208.67.222.222", port, tcp, tls, dns.Question{
+	return lookupV4V6(v4, v6,
+		func() (string, error) {
+			return lookupDNS(ctx, "208.67.222.222", port, tcp, tls, dns.Question{
 				Name:   "myip.opendns.com.",
 				Qtype:  dns.TypeA,
 				Qclass: dns.ClassANY,
 			})
-			return err
-		})
-	}
-
-	if v6 {
-		group.Go(func() error {
-			var err error
-			response.IPV6, err = lookupDNS(ctx, "2620:119:35::35", port, tcp, tls, dns.Question{
+		},
+		func() (string, error) {
+			return lookupDNS(ctx, "2620:119:35::35", port, tcp, tls, dns.Question{
 				Name:   "myip.opendns.com.",
 				Qtype:  dns.TypeAAAA,
 				Qclass: dns.ClassANY,
 			})
-			return err
-		})
-	}
-
-	err := group.Wait()
-	return response, err
+		},
+	)
 }
