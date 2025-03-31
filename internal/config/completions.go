@@ -68,28 +68,65 @@ func CompleteDomain(cmd *cobra.Command, args []string, toComplete string) ([]cob
 		return nil, cobra.ShellCompDirectiveError
 	}
 
-	trimmed, _, _ := strings.Cut(toComplete, ".")
-	var domains []string
+	var comps []string
 	iter := client.Zones.ListAutoPaging(cmd.Context(), conf.CloudflareZoneListParams())
 	for iter.Next() {
-		name := iter.Current().Name
-		if toComplete != "" {
-			if strings.HasSuffix(toComplete, name) {
-				return nil, cobra.ShellCompDirectiveNoFileComp
-			}
-			name = trimmed + "." + name
+		zone := iter.Current().Name
+
+		if toComplete != "" && strings.HasSuffix(toComplete, zone) {
+			return []string{toComplete}, cobra.ShellCompDirectiveNoFileComp
 		}
 
-		if !slices.Contains(conf.Domains, name) {
-			domains = append(domains, name)
-		}
+		comps = append(comps, zone)
 	}
 	if err := iter.Err(); err != nil {
 		slog.Error("Failed to list zones", "error", err)
 		return nil, cobra.ShellCompDirectiveError
 	}
 
-	return domains, cobra.ShellCompDirectiveNoFileComp
+	overlaps := make([]string, 0, len(comps))
+	if toComplete != "" {
+		// Finds zones that overlap with toComplete. For example:
+		// `home.ex` would overlap with `example.com`, resulting in `home.example.com`.
+		for _, zone := range comps {
+			prefix := toComplete
+			for {
+				if strings.HasPrefix(zone, prefix) {
+					overlaps = append(overlaps, strings.TrimPrefix(zone, prefix))
+					break
+				}
+
+				i := strings.Index(prefix, ".")
+				if i == -1 {
+					break
+				}
+
+				prefix = prefix[i+1:]
+			}
+		}
+	}
+
+	if len(overlaps) == 0 {
+		// No overlaps were found, assume toComplete is a subdomain
+		if toComplete != "" && !strings.HasSuffix(toComplete, ".") {
+			toComplete += "."
+		}
+	} else {
+		comps = overlaps
+	}
+
+	for i, zone := range comps {
+		comps[i] = toComplete + zone
+	}
+
+	if len(conf.Domains) != 0 {
+		// Remove already configured domains from the list
+		comps = slices.DeleteFunc(comps, func(s string) bool {
+			return slices.Contains(conf.Domains, s)
+		})
+	}
+
+	return comps, cobra.ShellCompDirectiveNoFileComp
 }
 
 func completeAccount(cmd *cobra.Command, args []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
