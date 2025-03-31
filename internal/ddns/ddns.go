@@ -16,31 +16,39 @@ import (
 	"github.com/cloudflare/cloudflare-go/v4/zones"
 )
 
-func Update(ctx context.Context, conf *config.Config) error {
+func NewUpdater(conf *config.Config) Updater {
+	return Updater{conf: conf}
+}
+
+type Updater struct {
+	conf   *config.Config
+	client *cloudflare.Client
+}
+
+func (u Updater) Update(ctx context.Context) error {
 	start := time.Now()
 
-	if conf.Timeout != 0 {
+	if u.conf.Timeout != 0 {
 		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, conf.Timeout)
+		ctx, cancel = context.WithTimeout(ctx, u.conf.Timeout)
 		defer cancel()
 	}
 
-	publicIP, err := lookup.GetPublicIP(ctx, conf)
+	publicIP, err := lookup.GetPublicIP(ctx, u.conf)
 	if err != nil {
 		return err
 	}
 	slog.Debug("Got public IP", "ip", publicIP)
 
-	client, err := conf.NewCloudflareClient()
-	if err != nil {
+	if u.client, err = u.conf.NewCloudflareClient(); err != nil {
 		return err
 	}
 
 	var group errsgroup.Group
 
-	for _, domain := range conf.Domains {
+	for _, domain := range u.conf.Domains {
 		group.Go(func() error {
-			return updateDomain(ctx, conf, client, domain, publicIP)
+			return u.updateDomain(ctx, domain, publicIP)
 		})
 	}
 
@@ -53,44 +61,36 @@ func Update(ctx context.Context, conf *config.Config) error {
 	return nil
 }
 
-func updateDomain(
-	ctx context.Context,
-	conf *config.Config,
-	client *cloudflare.Client,
-	domain string,
-	ip lookup.Response,
-) error {
-	zone, err := FindZone(ctx, client, conf.CloudflareZoneListParams(), domain)
+func (u Updater) updateDomain(ctx context.Context, domain string, ip lookup.Response) error {
+	zone, err := u.FindZone(ctx, u.conf.CloudflareZoneListParams(), domain)
 	if err != nil {
 		return err
 	}
 
-	v4, v6, err := GetRecords(ctx, client, zone, domain)
+	v4, v6, err := u.GetRecords(ctx, zone, domain)
 	if err != nil && !errors.Is(err, ErrRecordNotFound) {
 		return err
 	}
 
 	var group errsgroup.Group
 
-	if conf.UseV4 {
+	if u.conf.UseV4 {
 		group.Go(func() error {
-			return updateRecord(ctx, conf, client, zone, dns.RecordTypeA, v4, domain, ip.IPV4)
+			return u.updateRecord(ctx, zone, dns.RecordTypeA, v4, domain, ip.IPV4)
 		})
 	}
 
-	if conf.UseV6 {
+	if u.conf.UseV6 {
 		group.Go(func() error {
-			return updateRecord(ctx, conf, client, zone, dns.RecordTypeAAAA, v6, domain, ip.IPV6)
+			return u.updateRecord(ctx, zone, dns.RecordTypeAAAA, v6, domain, ip.IPV6)
 		})
 	}
 
 	return group.Wait()
 }
 
-func updateRecord(
+func (u Updater) updateRecord(
 	ctx context.Context,
-	conf *config.Config,
-	client *cloudflare.Client,
 	zone *zones.Zone,
 	recordType dns.RecordType,
 	record *dns.RecordResponse,
@@ -100,19 +100,19 @@ func updateRecord(
 	switch {
 	case record == nil:
 		log.Info("Creating record", "content", content)
-		if !conf.DryRun {
-			_, err := client.DNS.Records.New(ctx, dns.RecordNewParams{
+		if !u.conf.DryRun {
+			_, err := u.client.DNS.Records.New(ctx, dns.RecordNewParams{
 				ZoneID: cloudflare.F(zone.ID),
-				Record: newRecordParam(recordType, domain, content, conf.Proxied, dns.TTL(conf.TTL)),
+				Record: newRecordParam(recordType, domain, content, u.conf.Proxied, dns.TTL(u.conf.TTL)),
 			})
 			return err
 		}
 	case record.Content != content:
 		log.Info("Updating record", "previous", record.Content, "content", content)
-		if !conf.DryRun {
-			_, err := client.DNS.Records.Update(ctx, record.ID, dns.RecordUpdateParams{
+		if !u.conf.DryRun {
+			_, err := u.client.DNS.Records.Update(ctx, record.ID, dns.RecordUpdateParams{
 				ZoneID: cloudflare.F(zone.ID),
-				Record: newRecordParam(recordType, domain, content, conf.Proxied, dns.TTL(conf.TTL)),
+				Record: newRecordParam(recordType, domain, content, u.conf.Proxied, dns.TTL(u.conf.TTL)),
 			})
 			return err
 		}
@@ -124,13 +124,8 @@ func updateRecord(
 
 var ErrZoneNotFound = errors.New("zone not found")
 
-func FindZone(
-	ctx context.Context,
-	client *cloudflare.Client,
-	params zones.ZoneListParams,
-	domain string,
-) (*zones.Zone, error) {
-	iter := client.Zones.ListAutoPaging(ctx, params)
+func (u Updater) FindZone(ctx context.Context, params zones.ZoneListParams, domain string) (*zones.Zone, error) {
+	iter := u.client.Zones.ListAutoPaging(ctx, params)
 	for iter.Next() {
 		v := iter.Current()
 		if domain == v.Name || strings.HasSuffix(domain, "."+v.Name) {
@@ -149,13 +144,12 @@ var (
 	ErrUnsupportedRecordType = errors.New("unsupported record type")
 )
 
-func GetRecords(
+func (u Updater) GetRecords(
 	ctx context.Context,
-	client *cloudflare.Client,
 	zone *zones.Zone,
 	domain string,
 ) (*dns.RecordResponse, *dns.RecordResponse, error) {
-	iter := client.DNS.Records.ListAutoPaging(ctx, dns.RecordListParams{
+	iter := u.client.DNS.Records.ListAutoPaging(ctx, dns.RecordListParams{
 		ZoneID: cloudflare.F(zone.ID),
 		Name: cloudflare.F(dns.RecordListParamsName{
 			Exact: cloudflare.F(domain),

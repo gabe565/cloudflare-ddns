@@ -75,7 +75,7 @@ func run(cmd *cobra.Command, args []string) error {
 	ctx, cancel := signal.NotifyContext(cmd.Context(), os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
 	defer cancel()
 
-	if err := ddns.Update(ctx, conf); err != nil {
+	if err := ddns.NewUpdater(conf).Update(ctx); err != nil {
 		return err
 	}
 
@@ -87,7 +87,7 @@ func run(cmd *cobra.Command, args []string) error {
 			case <-ctx.Done():
 				return ctx.Err()
 			case <-ticker.C:
-				if err := ddns.Update(ctx, conf); err != nil {
+				if err := ddns.NewUpdater(conf).Update(ctx); err != nil {
 					slog.Error("Run failed", "error", err)
 				}
 			}
