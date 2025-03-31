@@ -27,6 +27,7 @@ func httpPlain(ctx context.Context, network, url string) (string, error) {
 	}
 
 	dialer := net.Dialer{}
+	//nolint:errcheck
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.DialContext = func(ctx context.Context, _, addr string) (net.Conn, error) {
 		return dialer.DialContext(ctx, network, addr)

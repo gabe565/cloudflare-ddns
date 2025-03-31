@@ -66,9 +66,16 @@ func (d DNSv4v6) Description(format output.Format) string {
 	switch format {
 	case output.FormatANSI:
 		bold := color.New(color.Bold).Sprint
-		return "Queries " + bold(strings.TrimSuffix(d.V4Question.Name, ".")) + " using " + proto + " via " + bold(d.Server) + "."
+		return "Queries " + bold(
+			strings.TrimSuffix(d.V4Question.Name, "."),
+		) + " using " + proto + " via " + bold(
+			d.Server,
+		) + "."
 	case output.FormatMarkdown:
-		return "Queries `" + strings.TrimSuffix(d.V4Question.Name, ".") + "` using " + proto + " via `" + d.Server + "`."
+		return "Queries `" + strings.TrimSuffix(
+			d.V4Question.Name,
+			".",
+		) + "` using " + proto + " via `" + d.Server + "`."
 	default:
 		panic("unimplemented format: " + format)
 	}

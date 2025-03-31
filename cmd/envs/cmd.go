@@ -56,9 +56,9 @@ func helpFunc(cmd *cobra.Command, _ []string) {
 		}
 
 		var value string
-		switch flag.Value.Type() {
-		case "stringSlice":
-			value = strings.Join(flag.Value.(pflag.SliceValue).GetSlice(), ",")
+		switch fv := flag.Value.(type) {
+		case pflag.SliceValue:
+			value = strings.Join(fv.GetSlice(), ",")
 		default:
 			value = flag.Value.String()
 		}
@@ -73,6 +73,7 @@ func helpFunc(cmd *cobra.Command, _ []string) {
 		}
 	})
 	slices.SortFunc(rows, func(a, b table.Row) int {
+		//nolint:errcheck
 		return cmp.Compare(a[0].(string), b[0].(string))
 	})
 	t.AppendRows(rows)

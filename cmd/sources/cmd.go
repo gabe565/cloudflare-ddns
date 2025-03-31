@@ -30,8 +30,10 @@ func helpFunc(cmd *cobra.Command, _ []string) {
 	italic := color.New(color.Italic).Sprint
 	var result strings.Builder
 	if format == output.FormatMarkdown {
-		result.WriteString("# Sources\n\nThe `--source` flag lets you define which sources are used to get your public IP address.\n\n" +
-			"## Available Sources\n\n")
+		result.WriteString(
+			"# Sources\n\nThe `--source` flag lets you define which sources are used to get your public IP address.\n\n" +
+				"## Available Sources\n\n",
+		)
 	} else {
 		result.WriteString("The " + italic("--source") + " flag lets you define which sources are used to get your public IP address.\n\n" +
 			"Available Sources:\n")

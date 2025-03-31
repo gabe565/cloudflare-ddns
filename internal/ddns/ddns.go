@@ -53,7 +53,13 @@ func Update(ctx context.Context, conf *config.Config) error {
 	return nil
 }
 
-func updateDomain(ctx context.Context, conf *config.Config, client *cloudflare.Client, domain string, ip lookup.Response) error {
+func updateDomain(
+	ctx context.Context,
+	conf *config.Config,
+	client *cloudflare.Client,
+	domain string,
+	ip lookup.Response,
+) error {
 	zone, err := FindZone(ctx, client, conf.CloudflareZoneListParams(), domain)
 	if err != nil {
 		return err
@@ -81,7 +87,15 @@ func updateDomain(ctx context.Context, conf *config.Config, client *cloudflare.C
 	return group.Wait()
 }
 
-func updateRecord(ctx context.Context, conf *config.Config, client *cloudflare.Client, zone *zones.Zone, recordType dns.RecordType, record *dns.RecordResponse, domain, content string) error {
+func updateRecord(
+	ctx context.Context,
+	conf *config.Config,
+	client *cloudflare.Client,
+	zone *zones.Zone,
+	recordType dns.RecordType,
+	record *dns.RecordResponse,
+	domain, content string,
+) error {
 	log := slog.With("type", recordType, "domain", domain)
 	switch {
 	case record == nil:
@@ -110,7 +124,12 @@ func updateRecord(ctx context.Context, conf *config.Config, client *cloudflare.C
 
 var ErrZoneNotFound = errors.New("zone not found")
 
-func FindZone(ctx context.Context, client *cloudflare.Client, params zones.ZoneListParams, domain string) (*zones.Zone, error) {
+func FindZone(
+	ctx context.Context,
+	client *cloudflare.Client,
+	params zones.ZoneListParams,
+	domain string,
+) (*zones.Zone, error) {
 	iter := client.Zones.ListAutoPaging(ctx, params)
 	for iter.Next() {
 		v := iter.Current()
@@ -130,7 +149,12 @@ var (
 	ErrUnsupportedRecordType = errors.New("unsupported record type")
 )
 
-func GetRecords(ctx context.Context, client *cloudflare.Client, zone *zones.Zone, domain string) (*dns.RecordResponse, *dns.RecordResponse, error) {
+func GetRecords(
+	ctx context.Context,
+	client *cloudflare.Client,
+	zone *zones.Zone,
+	domain string,
+) (*dns.RecordResponse, *dns.RecordResponse, error) {
 	iter := client.DNS.Records.ListAutoPaging(ctx, dns.RecordListParams{
 		ZoneID: cloudflare.F(zone.ID),
 		Name: cloudflare.F(dns.RecordListParamsName{

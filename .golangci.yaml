@@ -6,63 +6,56 @@ issues:
 formatters:
   enable:
     - gci
-    - gofumpt
+    - gofmt
     - goimports
+    - golines
   exclusions:
     generated: lax
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
+  settings:
+    golines:
+      max-len: 120
 
 linters:
-  exclusions:
-    generated: lax
-    presets:
-      - comments
-      - common-false-positives
-      - legacy
-      - std-error-handling
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
-    rules:
-      - path: _test\.go
-        linters:
-          - err113
-
   enable:
     - asasalint
     - asciicheck
     - bidichk
     - bodyclose
+    - canonicalheader
     - copyloopvar
     - decorder
+    - cyclop
+    - depguard
     - dupl
     - durationcheck
     - err113
+    - errcheck
     - errname
     - errorlint
+    - exptostd
+    - fatcontext
     - forbidigo
-    - ginkgolinter
+    - funlen
     - gocheckcompilerdirectives
     - gochecknoglobals
     - gochecknoinits
     - gochecksumtype
+    - gocognit
     - goconst
     - gocritic
     - gocyclo
     - godox
     - goheader
+    - godot
     - gomoddirectives
-    - gomodguard
     - goprintffuncname
     - gosec
-    - gosmopolitan
     - importas
     - inamedparam
     - interfacebloat
+    - govet
+    - iface
+    - ineffassign
     - intrange
     - ireturn
     - loggercheck
@@ -70,7 +63,9 @@ linters:
     - mirror
     - musttag
     - nakedret
+    - nestif
     - nilerr
+    - nilnesserr
     - nilnil
     - noctx
     - nolintlint
@@ -82,6 +77,7 @@ linters:
     - promlinter
     - protogetter
     - reassign
+    - recvcheck
     - revive
     - rowserrcheck
     - sloglint
@@ -92,8 +88,86 @@ linters:
     - testifylint
     - unconvert
     - unparam
+    - unused
     - usestdlibvars
     - usetesting
     - wastedassign
     - whitespace
-    - zerologlint
+  settings:
+    cyclop:
+      max-complexity: 30
+    depguard:
+      rules:
+        "deprecated":
+          files:
+            - "$all"
+          deny:
+            - pkg: github.com/golang/protobuf
+              desc: Use google.golang.org/protobuf instead, see https://developers.google.com/protocol-buffers/docs/reference/go/faq#modules
+            - pkg: github.com/satori/go.uuid
+              desc: Use github.com/google/uuid instead, satori's package is not maintained
+            - pkg: github.com/gofrs/uuid$
+              desc: Use github.com/gofrs/uuid/v5 or later, it was not a go module before v5
+        "non-test files":
+          files:
+            - "!$test"
+          deny:
+            - pkg: math/rand$
+              desc: Use math/rand/v2 instead, see https://go.dev/blog/randv2
+        "non-main files":
+          files:
+            - "!**/main.go"
+          deny:
+            - pkg: log$
+              desc: Use log/slog instead, see https://go.dev/blog/slog
+    errcheck:
+      check-type-assertions: true
+    funlen:
+      lines: 100
+      statements: 50
+    gocritic:
+      settings:
+        captLocal:
+          paramsOnly: false
+        underef:
+          skipRecvDeref: false
+    gosec:
+      excludes:
+        - G306
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment
+        - shadow
+    inamedparam:
+      skip-single-param: true
+    nakedret:
+      max-func-lines: 0
+    nestif:
+      min-complexity: 15
+    nolintlint:
+      allow-no-explanation: [funlen, gocognit, golines]
+      require-specific: true
+    perfsprint:
+      strconcat: false
+    usetesting:
+      os-temp-dir: true
+
+  exclusions:
+    warn-unused: true
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - path: _test\.go
+        linters:
+          - dupl
+          - err113
+          - errcheck
+          - funlen
+          - gocognit
+          - gocyclo
+          - gosec

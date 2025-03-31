@@ -13,28 +13,55 @@ import (
 )
 
 func (c *Config) RegisterCompletions(cmd *cobra.Command) {
-	must.Must(cmd.RegisterFlagCompletionFunc(FlagLogLevel, func(_ *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
-		return slogx.LevelStrings(), cobra.ShellCompDirectiveNoFileComp
-	}))
-	must.Must(cmd.RegisterFlagCompletionFunc(FlagLogFormat, func(_ *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
-		return slogx.FormatStrings(), cobra.ShellCompDirectiveNoFileComp
-	}))
+	must.Must(cmd.RegisterFlagCompletionFunc(
+		FlagLogLevel,
+		func(_ *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
+			return slogx.LevelStrings(), cobra.ShellCompDirectiveNoFileComp
+		},
+	))
+	must.Must(cmd.RegisterFlagCompletionFunc(
+		FlagLogFormat,
+		func(_ *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
+			return slogx.FormatStrings(), cobra.ShellCompDirectiveNoFileComp
+		},
+	))
 
-	must.Must(cmd.RegisterFlagCompletionFunc(FlagSource, func(_ *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
-		return SourceStrings(), cobra.ShellCompDirectiveNoFileComp
-	}))
+	must.Must(cmd.RegisterFlagCompletionFunc(
+		FlagSource,
+		func(_ *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
+			return SourceStrings(), cobra.ShellCompDirectiveNoFileComp
+		},
+	))
 	must.Must(cmd.RegisterFlagCompletionFunc(FlagDomain, CompleteDomain))
-	must.Must(cmd.RegisterFlagCompletionFunc(FlagInterval, func(_ *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
-		return []string{"1m", "15m", "1h", "24h"}, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveKeepOrder
-	}))
+	must.Must(cmd.RegisterFlagCompletionFunc(
+		FlagInterval,
+		func(_ *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
+			return []string{
+				"1m",
+				"15m",
+				"1h",
+				"24h",
+			}, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveKeepOrder
+		},
+	))
 	must.Must(cmd.RegisterFlagCompletionFunc(FlagDNSUseTCP, completeBool))
 	must.Must(cmd.RegisterFlagCompletionFunc(FlagProxied, completeBool))
-	must.Must(cmd.RegisterFlagCompletionFunc(FlagTTL, func(_ *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
-		return []string{"0\tauto", "5m", "1h"}, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveKeepOrder
-	}))
-	must.Must(cmd.RegisterFlagCompletionFunc(FlagTimeout, func(_ *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
-		return []string{"0\tno timeout", "30s", "1m"}, cobra.ShellCompDirectiveNoFileComp
-	}))
+	must.Must(cmd.RegisterFlagCompletionFunc(
+		FlagTTL,
+		func(_ *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
+			return []string{
+				"0\tauto",
+				"5m",
+				"1h",
+			}, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveKeepOrder
+		},
+	))
+	must.Must(cmd.RegisterFlagCompletionFunc(
+		FlagTimeout,
+		func(_ *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
+			return []string{"0\tno timeout", "30s", "1m"}, cobra.ShellCompDirectiveNoFileComp
+		},
+	))
 
 	must.Must(cmd.RegisterFlagCompletionFunc(FlagCloudflareAccountID, completeAccount))
 	must.Must(cmd.RegisterFlagCompletionFunc(FlagCloudflareToken, cobra.NoFileCompletions))
@@ -62,7 +89,11 @@ func setupCompletion(cmd *cobra.Command, args []string) (*Config, *cloudflare.Cl
 	return conf, client, nil
 }
 
-func CompleteDomain(cmd *cobra.Command, args []string, toComplete string) ([]cobra.Completion, cobra.ShellCompDirective) {
+func CompleteDomain(
+	cmd *cobra.Command,
+	args []string,
+	toComplete string,
+) ([]cobra.Completion, cobra.ShellCompDirective) {
 	conf, client, err := setupCompletion(cmd, args)
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveError
