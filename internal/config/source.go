@@ -37,25 +37,27 @@ type Requestv4v6 interface {
 }
 
 type HTTPv4v6 struct {
-	V4URL, V6URL string
+	URLv4, URLv6 string
 }
 
 func (d HTTPv4v6) Description(format output.Format) string {
 	switch format {
 	case output.FormatANSI:
 		bold := color.New(color.Bold).Sprint
-		return "Makes HTTPS requests to " + bold(d.V4URL) + " and " + bold(d.V6URL) + "."
+		return "Makes HTTPS requests to " + bold(d.URLv4) + " and " + bold(d.URLv6) + "."
 	case output.FormatMarkdown:
-		return "Makes HTTPS requests to `" + d.V4URL + "` and `" + d.V6URL + "`."
+		return "Makes HTTPS requests to `" + d.URLv4 + "` and `" + d.URLv6 + "`."
 	default:
 		panic("unimplemented format: " + format)
 	}
 }
 
 type DNSv4v6 struct {
-	Server                 string
-	TLS                    bool
-	V4Question, V6Question dns.Question
+	ServerV4   string
+	QuestionV4 dns.Question
+	ServerV6   string
+	QuestionV6 dns.Question
+	TLS        bool
 }
 
 func (d DNSv4v6) Description(format output.Format) string {
@@ -67,15 +69,15 @@ func (d DNSv4v6) Description(format output.Format) string {
 	case output.FormatANSI:
 		bold := color.New(color.Bold).Sprint
 		return "Queries " + bold(
-			strings.TrimSuffix(d.V4Question.Name, "."),
+			strings.TrimSuffix(d.QuestionV4.Name, "."),
 		) + " using " + proto + " via " + bold(
-			d.Server,
+			d.ServerV4,
 		) + "."
 	case output.FormatMarkdown:
 		return "Queries `" + strings.TrimSuffix(
-			d.V4Question.Name,
+			d.QuestionV4.Name,
 			".",
-		) + "` using " + proto + " via `" + d.Server + "`."
+		) + "` using " + proto + " via `" + d.ServerV4 + "`."
 	default:
 		panic("unimplemented format: " + format)
 	}
@@ -99,10 +101,11 @@ func (s Source) Request() Requestv4v6 { //nolint:ireturn
 			Qclass: dns.ClassCHAOS,
 		}
 		return DNSv4v6{
-			Server:     server,
+			ServerV4:   server,
+			QuestionV4: question,
+			ServerV6:   server,
+			QuestionV6: question,
 			TLS:        tls,
-			V4Question: question,
-			V6Question: question,
 		}
 	case SourceOpenDNSTLS:
 		server = "dns.opendns.com:853"
@@ -113,33 +116,34 @@ func (s Source) Request() Requestv4v6 { //nolint:ireturn
 			server = "dns.opendns.com:53"
 		}
 		return DNSv4v6{
-			Server: server,
-			TLS:    tls,
-			V4Question: dns.Question{
+			ServerV4: server,
+			QuestionV4: dns.Question{
 				Name:   "myip.opendns.com.",
 				Qtype:  dns.TypeA,
 				Qclass: dns.ClassANY,
 			},
-			V6Question: dns.Question{
+			ServerV6: server,
+			QuestionV6: dns.Question{
 				Name:   "myip.opendns.com.",
 				Qtype:  dns.TypeAAAA,
 				Qclass: dns.ClassANY,
 			},
+			TLS: tls,
 		}
 	case SourceICanHazIP:
 		return HTTPv4v6{
-			V4URL: "https://ipv4.icanhazip.com",
-			V6URL: "https://ipv6.icanhazip.com",
+			URLv4: "https://ipv4.icanhazip.com",
+			URLv6: "https://ipv6.icanhazip.com",
 		}
 	case SourceIPInfo:
 		return HTTPv4v6{
-			V4URL: "https://ipinfo.io/ip",
-			V6URL: "https://v6.ipinfo.io/ip",
+			URLv4: "https://ipinfo.io/ip",
+			URLv6: "https://v6.ipinfo.io/ip",
 		}
 	case SourceIPify:
 		return HTTPv4v6{
-			V4URL: "https://api.ipify.org",
-			V6URL: "https://api6.ipify.org",
+			URLv4: "https://api.ipify.org",
+			URLv6: "https://api6.ipify.org",
 		}
 	default:
 		panic("source request unimplemented: " + s.String())
