@@ -47,7 +47,7 @@ func GetPublicIP(ctx context.Context, conf *config.Config) (Response, error) {
 			panic("unknown request type")
 		}
 		if err == nil {
-			slogx.Trace("Got response", "source", source, "ip", response)
+			slog.Debug("Got response", "source", source, "ip", response)
 			return response, nil
 		}
 		errs = append(errs, fmt.Errorf("%s: %w", source, err))
