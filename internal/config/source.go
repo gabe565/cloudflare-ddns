@@ -120,13 +120,13 @@ func (s Source) Request() Requestv4v6 { //nolint:ireturn
 			QuestionV4: dns.Question{
 				Name:   "myip.opendns.com.",
 				Qtype:  dns.TypeA,
-				Qclass: dns.ClassANY,
+				Qclass: dns.ClassINET,
 			},
 			ServerV6: server,
 			QuestionV6: dns.Question{
 				Name:   "myip.opendns.com.",
 				Qtype:  dns.TypeAAAA,
-				Qclass: dns.ClassANY,
+				Qclass: dns.ClassINET,
 			},
 			TLS: tls,
 		}
