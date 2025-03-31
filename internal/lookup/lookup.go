@@ -7,7 +7,6 @@ import (
 	"log/slog"
 
 	"gabe565.com/cloudflare-ddns/internal/config"
-	"gabe565.com/cloudflare-ddns/internal/errsgroup"
 	"gabe565.com/utils/slogx"
 )
 
@@ -39,21 +38,13 @@ func GetPublicIP(ctx context.Context, conf *config.Config) (Response, error) {
 		slogx.Trace("Querying source", "name", source)
 		var response Response
 		var err error
-		switch source {
-		case config.SourceCloudflareTLS:
-			response, err = Cloudflare(ctx, true, conf.DNSUseTCP, conf.UseV4, conf.UseV6)
-		case config.SourceCloudflare:
-			response, err = Cloudflare(ctx, false, conf.DNSUseTCP, conf.UseV4, conf.UseV6)
-		case config.SourceOpenDNSTLS:
-			response, err = OpenDNS(ctx, true, conf.DNSUseTCP, conf.UseV4, conf.UseV6)
-		case config.SourceOpenDNS:
-			response, err = OpenDNS(ctx, false, conf.DNSUseTCP, conf.UseV4, conf.UseV6)
-		case config.SourceICanHazIP:
-			response, err = ICanHazIP(ctx, conf.UseV4, conf.UseV6)
-		case config.SourceIPInfo:
-			response, err = IPInfo(ctx, conf.UseV4, conf.UseV6)
-		case config.SourceIPify:
-			response, err = IPify(ctx, conf.UseV4, conf.UseV6)
+		switch req := source.Request().(type) {
+		case config.DNSv4v6:
+			response, err = DNSv4v6(ctx, conf.UseV4, conf.UseV6, conf.DNSUseTCP, req)
+		case config.HTTPv4v6:
+			response, err = HTTPv4v6(ctx, conf.UseV4, conf.UseV6, req)
+		default:
+			panic("unknown request type")
 		}
 		if err == nil {
 			slogx.Trace("Got response", "source", source, "ip", response)
@@ -63,28 +54,4 @@ func GetPublicIP(ctx context.Context, conf *config.Config) (Response, error) {
 		slog.Debug("Source failed", "source", source, "error", err)
 	}
 	return Response{}, fmt.Errorf("%w: %w", ErrAllSourcesFailed, errors.Join(errs...))
-}
-
-func lookupV4V6(v4, v6 bool, v4func, v6func func() (string, error)) (Response, error) {
-	var response Response
-	var group errsgroup.Group
-
-	if v4 {
-		group.Go(func() error {
-			var err error
-			response.IPV4, err = v4func()
-			return err
-		})
-	}
-
-	if v6 {
-		group.Go(func() error {
-			var err error
-			response.IPV6, err = v6func()
-			return err
-		})
-	}
-
-	err := group.Wait()
-	return response, err
 }

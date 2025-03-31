@@ -8,6 +8,8 @@ import (
 	"syscall"
 	"time"
 
+	"gabe565.com/cloudflare-ddns/cmd/envs"
+	"gabe565.com/cloudflare-ddns/cmd/sources"
 	"gabe565.com/cloudflare-ddns/internal/config"
 	"gabe565.com/cloudflare-ddns/internal/ddns"
 	"gabe565.com/utils/cobrax"
@@ -20,10 +22,19 @@ func New(opts ...cobrax.Option) *cobra.Command {
 		Short: "Sync a Cloudflare DNS record with your current public IP address",
 		RunE:  run,
 
+		// Fixes unknown command error due to help subcommands
+		Args: func(_ *cobra.Command, _ []string) error {
+			return nil
+		},
+
 		ValidArgsFunction: config.CompleteDomain,
 		SilenceErrors:     true,
 		DisableAutoGenTag: true,
 	}
+	cmd.AddCommand(
+		envs.New(),
+		sources.New(),
+	)
 
 	conf := config.New()
 	conf.RegisterFlags(cmd)

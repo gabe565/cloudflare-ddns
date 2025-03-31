@@ -139,4 +139,6 @@ docker run --rm -d --restart=always \
 ```
 
 ### Full Reference
-For additional information, see the [full usage documentation](docs/cloudflare-ddns.md) and the [environment variable reference](docs/envs.md).
+- [Command line usage](docs/cloudflare-ddns.md)
+- [Environment variables](docs/cloudflare-ddns_envs.md)
+- [Sources](docs/cloudflare-ddns_sources.md)

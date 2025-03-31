@@ -34,7 +34,7 @@ func (c *Config) RegisterFlags(cmd *cobra.Command) {
 	fs.Var(&c.LogLevel, FlagLogLevel, "Log level (one of "+strings.Join(slogx.LevelStrings(), ", ")+")")
 	fs.Var(&c.LogFormat, FlagLogFormat, "Log format (one of "+strings.Join(slogx.FormatStrings(), ", ")+")")
 
-	fs.StringSliceVarP(&c.SourceStrs, FlagSource, "s", c.SourceStrs, "Enabled IP sources (supports "+strings.Join(SourceStrings(), ", ")+")")
+	fs.StringSliceVarP(&c.SourceStrs, FlagSource, "s", c.SourceStrs, "Enabled IP sources (see cloudflare-ddns sources)")
 	fs.BoolVarP(&c.UseV4, FlagIPV4, "4", c.UseV4, "Enables A records")
 	fs.BoolVarP(&c.UseV6, FlagIPV6, "6", c.UseV6, "Enables AAAA records")
 	fs.StringSliceVarP(&c.Domains, FlagDomain, "d", c.Domains, "Domains to manage")

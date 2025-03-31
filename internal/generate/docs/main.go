@@ -1,23 +1,19 @@
 package main
 
 import (
-	"cmp"
+	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
-	"slices"
-	"strings"
 
 	"gabe565.com/cloudflare-ddns/cmd"
-	"gabe565.com/cloudflare-ddns/internal/config"
+	"gabe565.com/cloudflare-ddns/cmd/envs"
+	"gabe565.com/cloudflare-ddns/cmd/sources"
 	"gabe565.com/utils/cobrax"
-	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
-	"github.com/spf13/pflag"
 )
 
 func main() {
@@ -33,11 +29,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	root := cmd.New(cobrax.WithVersion("beta"))
+	root := cmd.New(cobrax.WithVersion("beta"), cmd.WithMarkdown())
 
 	if err := errors.Join(
-		generateFlagDoc(root, output),
-		generateEnvDoc(root, filepath.Join(output, "envs.md")),
+		generateFlagDoc(root, filepath.Join(output, root.Name()+".md")),
+		generateEnvDoc(root, filepath.Join(output, root.Name()+"_envs.md")),
+		generateSourcesDoc(root, filepath.Join(output, root.Name()+"_sources.md")),
 	); err != nil {
 		slog.Error(err.Error())
 		os.Exit(1)
@@ -45,62 +42,64 @@ func main() {
 }
 
 func generateFlagDoc(cmd *cobra.Command, output string) error {
-	if err := doc.GenMarkdownTree(cmd, output); err != nil {
+	var buf bytes.Buffer
+	if err := doc.GenMarkdown(cmd, &buf); err != nil {
 		return fmt.Errorf("failed to generate markdown: %w", err)
 	}
-	return nil
+
+	buf.WriteString("### SEE ALSO\n")
+	addSeeAlso(&buf, cmd, cmd.Commands()...)
+
+	return os.WriteFile(output, buf.Bytes(), 0o600)
 }
 
 func generateEnvDoc(cmd *cobra.Command, output string) error {
-	excludeNames := []string{"completion", "help", "version"}
-	var rows []table.Row
-	cmd.Flags().VisitAll(func(flag *pflag.Flag) {
-		if slices.Contains(excludeNames, flag.Name) {
-			return
-		}
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetArgs([]string{envs.Name})
+	if err := cmd.Execute(); err != nil {
+		return err
+	}
 
-		var value string
-		switch fv := flag.Value.(type) {
-		case pflag.SliceValue:
-			value = strings.Join(flag.Value.(pflag.SliceValue).GetSlice(), ",")
-		default:
-			value = fv.String()
-		}
-		if value == "" {
-			value = " "
-		}
-
-		rows = append(rows, table.Row{
-			"`" + config.EnvName(flag.Name) + "`",
-			flag.Usage,
-			"`" + value + "`",
-		})
-	})
-	slices.SortFunc(rows, func(a, b table.Row) int {
-		return cmp.Compare(a[0].(string), b[0].(string))
-	})
-
-	t := table.NewWriter()
-	t.AppendHeader(table.Row{"Name", "Usage", "Default"})
-	t.AppendRows(rows)
-
-	var buf strings.Builder
-	buf.WriteString("# Environment Variables\n\n")
-	buf.WriteString(t.RenderMarkdown())
-
-	f, err := os.Create(output)
+	sourcesCmd, _, err := cmd.Find([]string{sources.Name})
 	if err != nil {
-		return fmt.Errorf("failed to create env file: %w", err)
-	}
-	defer f.Close()
-
-	if _, err := io.WriteString(f, buf.String()); err != nil {
-		return fmt.Errorf("failed to write to env file: %w", err)
+		panic(err)
 	}
 
-	if err := f.Close(); err != nil {
-		return fmt.Errorf("failed to close env file: %w", err)
+	buf.WriteString("\n### SEE ALSO\n")
+	addSeeAlso(&buf, cmd, cmd, sourcesCmd)
+
+	return os.WriteFile(output, buf.Bytes(), 0o600)
+}
+
+func generateSourcesDoc(cmd *cobra.Command, output string) error {
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetArgs([]string{sources.Name})
+	if err := cmd.Execute(); err != nil {
+		return err
 	}
 
-	return nil
+	envCmd, _, err := cmd.Find([]string{envs.Name})
+	if err != nil {
+		return err
+	}
+
+	buf.WriteString("\n### SEE ALSO\n")
+	addSeeAlso(&buf, cmd, cmd, envCmd)
+
+	return os.WriteFile(output, buf.Bytes(), 0o600)
+}
+
+func addSeeAlso(buf *bytes.Buffer, cmd *cobra.Command, cmds ...*cobra.Command) {
+	for _, subcmd := range cmds {
+		if subcmd.Name() == "help" {
+			continue
+		}
+		if cmd.Name() == subcmd.Name() {
+			fmt.Fprintf(buf, "* [%s](%s.md)  - %s\n", subcmd.Name(), subcmd.Name(), subcmd.Short)
+		} else {
+			fmt.Fprintf(buf, "* [%s %s](%s_%s.md)  - %s\n", cmd.Name(), subcmd.Name(), cmd.Name(), subcmd.Name(), subcmd.Short)
+		}
+	}
 }

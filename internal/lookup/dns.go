@@ -3,16 +3,17 @@ package lookup
 import (
 	"context"
 	"errors"
-	"net"
 	"time"
 
+	"gabe565.com/cloudflare-ddns/internal/config"
+	"gabe565.com/cloudflare-ddns/internal/errsgroup"
 	"gabe565.com/utils/slogx"
 	"github.com/miekg/dns"
 )
 
 var ErrNoDNSAnswer = errors.New("no DNS answer")
 
-func lookupDNS(ctx context.Context, host, port string, tcp, ipv6, tls bool, question dns.Question) (string, error) {
+func lookupDNS(ctx context.Context, server string, tcp, ipv6, tls bool, question dns.Question) (string, error) {
 	start := time.Now()
 	c := &dns.Client{}
 	if ipv6 {
@@ -36,7 +37,6 @@ func lookupDNS(ctx context.Context, host, port string, tcp, ipv6, tls bool, ques
 	}
 	m := &dns.Msg{Question: []dns.Question{question}}
 
-	server := net.JoinHostPort(host, port)
 	slogx.Trace("DNS query",
 		"server", server,
 		"net", c.Net,
@@ -71,44 +71,26 @@ func lookupDNS(ctx context.Context, host, port string, tcp, ipv6, tls bool, ques
 	return val, nil
 }
 
-func Cloudflare(ctx context.Context, tls, tcp, v4, v6 bool) (Response, error) {
-	port := "53"
-	if tls {
-		port = "853"
+func DNSv4v6(ctx context.Context, v4, v6, tcp bool, req config.DNSv4v6) (Response, error) {
+	var response Response
+	var group errsgroup.Group
+
+	if v4 {
+		group.Go(func() error {
+			var err error
+			response.IPV4, err = lookupDNS(ctx, req.Server, tcp, false, req.TLS, req.V4Question)
+			return err
+		})
 	}
 
-	question := dns.Question{
-		Name:   "whoami.cloudflare.",
-		Qtype:  dns.TypeTXT,
-		Qclass: dns.ClassCHAOS,
+	if v6 {
+		group.Go(func() error {
+			var err error
+			response.IPV6, err = lookupDNS(ctx, req.Server, tcp, true, req.TLS, req.V6Question)
+			return err
+		})
 	}
 
-	return lookupV4V6(v4, v6,
-		func() (string, error) { return lookupDNS(ctx, "one.one.one.one", port, tcp, false, tls, question) },
-		func() (string, error) { return lookupDNS(ctx, "one.one.one.one", port, tcp, true, tls, question) },
-	)
-}
-
-func OpenDNS(ctx context.Context, tls, tcp, v4, v6 bool) (Response, error) {
-	port := "53"
-	if tls {
-		port = "853"
-	}
-
-	return lookupV4V6(v4, v6,
-		func() (string, error) {
-			return lookupDNS(ctx, "dns.opendns.com", port, tcp, false, tls, dns.Question{
-				Name:   "myip.opendns.com.",
-				Qtype:  dns.TypeA,
-				Qclass: dns.ClassANY,
-			})
-		},
-		func() (string, error) {
-			return lookupDNS(ctx, "dns.opendns.com", port, tcp, true, tls, dns.Question{
-				Name:   "myip.opendns.com.",
-				Qtype:  dns.TypeAAAA,
-				Qclass: dns.ClassANY,
-			})
-		},
-	)
+	err := group.Wait()
+	return response, err
 }

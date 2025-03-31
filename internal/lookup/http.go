@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"time"
 
+	"gabe565.com/cloudflare-ddns/internal/config"
+	"gabe565.com/cloudflare-ddns/internal/errsgroup"
 	"gabe565.com/utils/slogx"
 )
 
@@ -54,23 +56,26 @@ func httpPlain(ctx context.Context, network, url string) (string, error) {
 	return string(bytes.TrimSpace(b)), nil
 }
 
-func ICanHazIP(ctx context.Context, v4, v6 bool) (Response, error) {
-	return lookupV4V6(v4, v6,
-		func() (string, error) { return httpPlain(ctx, "tcp4", "https://ipv4.icanhazip.com") },
-		func() (string, error) { return httpPlain(ctx, "tcp6", "https://ipv6.icanhazip.com") },
-	)
-}
+func HTTPv4v6(ctx context.Context, v4, v6 bool, req config.HTTPv4v6) (Response, error) {
+	var response Response
+	var group errsgroup.Group
 
-func IPInfo(ctx context.Context, v4, v6 bool) (Response, error) {
-	return lookupV4V6(v4, v6,
-		func() (string, error) { return httpPlain(ctx, "tcp4", "https://ipinfo.io/ip") },
-		func() (string, error) { return httpPlain(ctx, "tcp6", "https://v6.ipinfo.io/ip") },
-	)
-}
+	if v4 {
+		group.Go(func() error {
+			var err error
+			response.IPV4, err = httpPlain(ctx, "tcp4", req.V4URL)
+			return err
+		})
+	}
 
-func IPify(ctx context.Context, v4, v6 bool) (Response, error) {
-	return lookupV4V6(v4, v6,
-		func() (string, error) { return httpPlain(ctx, "tcp4", "https://api.ipify.org") },
-		func() (string, error) { return httpPlain(ctx, "tcp6", "https://api6.ipify.org") },
-	)
+	if v6 {
+		group.Go(func() error {
+			var err error
+			response.IPV6, err = httpPlain(ctx, "tcp6", req.V6URL)
+			return err
+		})
+	}
+
+	err := group.Wait()
+	return response, err
 }
