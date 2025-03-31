@@ -64,7 +64,7 @@ func HTTPv4v6(ctx context.Context, v4, v6 bool, req config.HTTPv4v6) (Response, 
 	if v4 {
 		group.Go(func() error {
 			var err error
-			response.IPV4, err = httpPlain(ctx, "tcp4", req.V4URL)
+			response.IPV4, err = httpPlain(ctx, tcp4, req.URLv4)
 			return err
 		})
 	}
@@ -72,7 +72,7 @@ func HTTPv4v6(ctx context.Context, v4, v6 bool, req config.HTTPv4v6) (Response, 
 	if v6 {
 		group.Go(func() error {
 			var err error
-			response.IPV6, err = httpPlain(ctx, "tcp6", req.V6URL)
+			response.IPV6, err = httpPlain(ctx, tcp6, req.URLv6)
 			return err
 		})
 	}

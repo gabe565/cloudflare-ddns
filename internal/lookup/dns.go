@@ -11,26 +11,31 @@ import (
 	"github.com/miekg/dns"
 )
 
+const (
+	tcp4 = "tcp4"
+	tcp6 = "tcp6"
+)
+
 var ErrNoDNSAnswer = errors.New("no DNS answer")
 
-func lookupDNS(ctx context.Context, server string, tcp, ipv6, tls bool, question dns.Question) (string, error) {
+func dnsQuery(ctx context.Context, server string, tcp, ipv6, tls bool, question dns.Question) (string, error) {
 	start := time.Now()
 	c := &dns.Client{}
 	if ipv6 {
 		switch {
 		case tls:
-			c.Net = "tcp6-tls"
+			c.Net = tcp6 + "-tls"
 		case tcp:
-			c.Net = "tcp6"
+			c.Net = tcp6
 		default:
 			c.Net = "udp6"
 		}
 	} else {
 		switch {
 		case tls:
-			c.Net = "tcp4-tls"
+			c.Net = tcp4 + "-tls"
 		case tcp:
-			c.Net = "tcp4"
+			c.Net = tcp4
 		default:
 			c.Net = "udp4"
 		}
@@ -78,7 +83,7 @@ func DNSv4v6(ctx context.Context, v4, v6, tcp bool, req config.DNSv4v6) (Respons
 	if v4 {
 		group.Go(func() error {
 			var err error
-			response.IPV4, err = lookupDNS(ctx, req.Server, tcp, false, req.TLS, req.V4Question)
+			response.IPV4, err = dnsQuery(ctx, req.ServerV4, tcp, false, req.TLS, req.QuestionV4)
 			return err
 		})
 	}
@@ -86,7 +91,7 @@ func DNSv4v6(ctx context.Context, v4, v6, tcp bool, req config.DNSv4v6) (Respons
 	if v6 {
 		group.Go(func() error {
 			var err error
-			response.IPV6, err = lookupDNS(ctx, req.Server, tcp, true, req.TLS, req.V6Question)
+			response.IPV6, err = dnsQuery(ctx, req.ServerV6, tcp, true, req.TLS, req.QuestionV6)
 			return err
 		})
 	}
