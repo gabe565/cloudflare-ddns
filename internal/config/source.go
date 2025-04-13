@@ -24,12 +24,7 @@ const (
 
 func (s Source) Description(format output.Format) string {
 	req := s.Request()
-	switch req := req.(type) {
-	case DNSv4v6, HTTPv4v6:
-		return req.Description(format)
-	default:
-		panic("invalid request type")
-	}
+	return req.Description(format)
 }
 
 type Requestv4v6 interface {
