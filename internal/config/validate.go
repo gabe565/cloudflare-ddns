@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"fmt"
+
+	"gabe565.com/cloudflare-ddns/internal/lookup"
 )
 
 var (
@@ -14,7 +16,7 @@ var (
 
 func (c *Config) Validate() error {
 	for _, sourceStr := range c.SourceStrs {
-		if _, err := SourceString(sourceStr); err != nil {
+		if _, err := lookup.SourceString(sourceStr); err != nil {
 			return fmt.Errorf("%w: %s", ErrInvalidSource, sourceStr)
 		}
 	}

@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"gabe565.com/cloudflare-ddns/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -38,17 +37,17 @@ func newHTTPServer(t *testing.T, network string) *httptest.Server {
 	return server
 }
 
-func Test_httpPlain(t *testing.T) {
+func Test_HTTPPlain(t *testing.T) {
 	t.Run("v4", func(t *testing.T) {
 		server := newHTTPServer(t, tcp4)
-		got, err := httpPlain(t.Context(), tcp4, server.URL)
+		got, err := HTTP(t.Context(), tcp4, server.URL)
 		require.NoError(t, err)
 		assert.Equal(t, cfV4, got)
 	})
 
 	t.Run("v6", func(t *testing.T) {
 		server := newHTTPServer(t, tcp6)
-		got, err := httpPlain(t.Context(), tcp6, server.URL)
+		got, err := HTTP(t.Context(), tcp6, server.URL)
 		require.NoError(t, err)
 		assert.Equal(t, cfV6, got)
 	})
@@ -56,7 +55,8 @@ func Test_httpPlain(t *testing.T) {
 
 func TestHTTPv4v6(t *testing.T) {
 	t.Run("both", func(t *testing.T) {
-		got, err := HTTPv4v6(t.Context(), true, true, config.HTTPv4v6{
+		c := Client{v4: true, v6: true}
+		got, err := c.HTTPv4v6(t.Context(), HTTPv4v6{
 			URLv4: newHTTPServer(t, tcp4).URL,
 			URLv6: newHTTPServer(t, tcp6).URL,
 		})
@@ -67,7 +67,8 @@ func TestHTTPv4v6(t *testing.T) {
 	})
 
 	t.Run("only v4", func(t *testing.T) {
-		got, err := HTTPv4v6(t.Context(), true, false, config.HTTPv4v6{
+		c := Client{v4: true}
+		got, err := c.HTTPv4v6(t.Context(), HTTPv4v6{
 			URLv4: newHTTPServer(t, tcp4).URL,
 		})
 		require.NoError(t, err)
@@ -77,7 +78,8 @@ func TestHTTPv4v6(t *testing.T) {
 	})
 
 	t.Run("only v6", func(t *testing.T) {
-		got, err := HTTPv4v6(t.Context(), false, true, config.HTTPv4v6{
+		c := Client{v6: true}
+		got, err := c.HTTPv4v6(t.Context(), HTTPv4v6{
 			URLv6: newHTTPServer(t, tcp6).URL,
 		})
 		require.NoError(t, err)

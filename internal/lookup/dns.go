@@ -5,7 +5,6 @@ import (
 	"errors"
 	"time"
 
-	"gabe565.com/cloudflare-ddns/internal/config"
 	"gabe565.com/cloudflare-ddns/internal/errsgroup"
 	"gabe565.com/utils/slogx"
 	"github.com/miekg/dns"
@@ -18,7 +17,7 @@ const (
 
 var ErrNoDNSAnswer = errors.New("no DNS answer")
 
-func dnsQuery(ctx context.Context, server string, tcp, ipv6, tls bool, question dns.Question) (string, error) {
+func DNS(ctx context.Context, server string, tcp, ipv6, tls bool, question dns.Question) (string, error) {
 	start := time.Now()
 	c := &dns.Client{}
 	if ipv6 {
@@ -76,22 +75,22 @@ func dnsQuery(ctx context.Context, server string, tcp, ipv6, tls bool, question 
 	return val, nil
 }
 
-func DNSv4v6(ctx context.Context, v4, v6, tcp bool, req config.DNSv4v6) (Response, error) {
+func (c *Client) DNSv4v6(ctx context.Context, req DNSv4v6) (Response, error) {
 	var response Response
 	var group errsgroup.Group
 
-	if v4 {
+	if c.v4 {
 		group.Go(func() error {
 			var err error
-			response.IPV4, err = dnsQuery(ctx, req.ServerV4, tcp, false, req.TLS, req.QuestionV4)
+			response.IPV4, err = DNS(ctx, req.ServerV4, c.tcp, false, req.TLS, req.QuestionV4)
 			return err
 		})
 	}
 
-	if v6 {
+	if c.v6 {
 		group.Go(func() error {
 			var err error
-			response.IPV6, err = dnsQuery(ctx, req.ServerV6, tcp, true, req.TLS, req.QuestionV6)
+			response.IPV6, err = DNS(ctx, req.ServerV6, c.tcp, true, req.TLS, req.QuestionV6)
 			return err
 		})
 	}

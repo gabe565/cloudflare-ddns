@@ -1,4 +1,4 @@
-package config
+package lookup
 
 import (
 	"strings"
@@ -8,18 +8,18 @@ import (
 	"github.com/miekg/dns"
 )
 
-//go:generate go tool enumer -type Source -trimprefix Source -transform snake -linecomment -output source_string.go
+//go:generate go tool enumer -type Source -transform snake -linecomment -output source_string.go
 
 type Source uint8
 
 const (
-	SourceCloudflareTLS Source = iota
-	SourceCloudflare
-	SourceOpenDNSTLS // opendns_tls
-	SourceOpenDNS    // opendns
-	SourceICanHazIP  // icanhazip
-	SourceIPInfo     // ipinfo
-	SourceIPify      // ipify
+	CloudflareTLS Source = iota
+	Cloudflare
+	OpenDNSTLS // opendns_tls
+	OpenDNS    // opendns
+	ICanHazIP  // icanhazip
+	IPInfo     // ipinfo
+	IPify      // ipify
 )
 
 func (s Source) Description(format output.Format) string {
@@ -82,11 +82,11 @@ func (s Source) Request() Requestv4v6 { //nolint:ireturn
 	var server string
 	var tls bool
 	switch s {
-	case SourceCloudflareTLS:
+	case CloudflareTLS:
 		server = "one.one.one.one:853"
 		tls = true
 		fallthrough
-	case SourceCloudflare:
+	case Cloudflare:
 		if server == "" {
 			server = "one.one.one.one:53"
 		}
@@ -102,11 +102,11 @@ func (s Source) Request() Requestv4v6 { //nolint:ireturn
 			QuestionV6: question,
 			TLS:        tls,
 		}
-	case SourceOpenDNSTLS:
+	case OpenDNSTLS:
 		server = "dns.opendns.com:853"
 		tls = true
 		fallthrough
-	case SourceOpenDNS:
+	case OpenDNS:
 		if server == "" {
 			server = "dns.opendns.com:53"
 		}
@@ -125,17 +125,17 @@ func (s Source) Request() Requestv4v6 { //nolint:ireturn
 			},
 			TLS: tls,
 		}
-	case SourceICanHazIP:
+	case ICanHazIP:
 		return HTTPv4v6{
 			URLv4: "https://ipv4.icanhazip.com",
 			URLv6: "https://ipv6.icanhazip.com",
 		}
-	case SourceIPInfo:
+	case IPInfo:
 		return HTTPv4v6{
 			URLv4: "https://ipinfo.io/ip",
 			URLv6: "https://v6.ipinfo.io/ip",
 		}
-	case SourceIPify:
+	case IPify:
 		return HTTPv4v6{
 			URLv4: "https://api.ipify.org",
 			URLv6: "https://api6.ipify.org",

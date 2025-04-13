@@ -10,14 +10,13 @@ import (
 	"net/http"
 	"time"
 
-	"gabe565.com/cloudflare-ddns/internal/config"
 	"gabe565.com/cloudflare-ddns/internal/errsgroup"
 	"gabe565.com/utils/slogx"
 )
 
 var ErrUpstreamStatus = errors.New("upstream error")
 
-func httpPlain(ctx context.Context, network, url string) (string, error) {
+func HTTP(ctx context.Context, network, url string) (string, error) {
 	start := time.Now()
 	slogx.Trace("HTTP request", "url", url)
 
@@ -57,22 +56,22 @@ func httpPlain(ctx context.Context, network, url string) (string, error) {
 	return string(bytes.TrimSpace(b)), nil
 }
 
-func HTTPv4v6(ctx context.Context, v4, v6 bool, req config.HTTPv4v6) (Response, error) {
+func (c *Client) HTTPv4v6(ctx context.Context, req HTTPv4v6) (Response, error) {
 	var response Response
 	var group errsgroup.Group
 
-	if v4 {
+	if c.v4 {
 		group.Go(func() error {
 			var err error
-			response.IPV4, err = httpPlain(ctx, tcp4, req.URLv4)
+			response.IPV4, err = HTTP(ctx, tcp4, req.URLv4)
 			return err
 		})
 	}
 
-	if v6 {
+	if c.v6 {
 		group.Go(func() error {
 			var err error
-			response.IPV6, err = httpPlain(ctx, tcp6, req.URLv6)
+			response.IPV6, err = HTTP(ctx, tcp6, req.URLv6)
 			return err
 		})
 	}

@@ -4,7 +4,6 @@ import (
 	"net"
 	"testing"
 
-	"gabe565.com/cloudflare-ddns/internal/config"
 	"github.com/miekg/dns"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -65,9 +64,9 @@ func newDNSServer(t *testing.T, network string) string {
 	}
 }
 
-func Test_dnsQuery(t *testing.T) {
+func Test_DNS(t *testing.T) {
 	t.Run("v4", func(t *testing.T) {
-		got, err := dnsQuery(t.Context(), newDNSServer(t, tcp4), true, false, false, dns.Question{
+		got, err := DNS(t.Context(), newDNSServer(t, tcp4), true, false, false, dns.Question{
 			Name:   domain,
 			Qtype:  dns.TypeA,
 			Qclass: dns.ClassINET,
@@ -77,7 +76,7 @@ func Test_dnsQuery(t *testing.T) {
 	})
 
 	t.Run("v6", func(t *testing.T) {
-		got, err := dnsQuery(t.Context(), newDNSServer(t, tcp6), true, true, false, dns.Question{
+		got, err := DNS(t.Context(), newDNSServer(t, tcp6), true, true, false, dns.Question{
 			Name:   domain,
 			Qtype:  dns.TypeAAAA,
 			Qclass: dns.ClassINET,
@@ -89,7 +88,8 @@ func Test_dnsQuery(t *testing.T) {
 
 func TestDNSv4v6(t *testing.T) {
 	t.Run("both", func(t *testing.T) {
-		got, err := DNSv4v6(t.Context(), true, true, true, config.DNSv4v6{
+		c := Client{v4: true, v6: true, tcp: true}
+		got, err := c.DNSv4v6(t.Context(), DNSv4v6{
 			ServerV4: newDNSServer(t, tcp4),
 			QuestionV4: dns.Question{
 				Name:   domain,
@@ -110,7 +110,8 @@ func TestDNSv4v6(t *testing.T) {
 	})
 
 	t.Run("only v4", func(t *testing.T) {
-		got, err := DNSv4v6(t.Context(), true, false, true, config.DNSv4v6{
+		c := Client{v4: true, tcp: true}
+		got, err := c.DNSv4v6(t.Context(), DNSv4v6{
 			ServerV4: newDNSServer(t, tcp4),
 			QuestionV4: dns.Question{
 				Name:   domain,
@@ -125,7 +126,8 @@ func TestDNSv4v6(t *testing.T) {
 	})
 
 	t.Run("only v6", func(t *testing.T) {
-		got, err := DNSv4v6(t.Context(), false, true, true, config.DNSv4v6{
+		c := Client{v6: true, tcp: true}
+		got, err := c.DNSv4v6(t.Context(), DNSv4v6{
 			ServerV6: newDNSServer(t, tcp6),
 			QuestionV6: dns.Question{
 				Name:   domain,

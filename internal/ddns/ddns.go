@@ -34,11 +34,10 @@ func (u Updater) Update(ctx context.Context) error {
 		defer cancel()
 	}
 
-	publicIP, err := lookup.GetPublicIP(ctx, u.conf)
+	publicIP, err := u.getPublicIP(ctx)
 	if err != nil {
 		return err
 	}
-	slog.Debug("Got public IP", "ip", publicIP)
 
 	if u.client, err = u.conf.NewCloudflareClient(); err != nil {
 		return err
@@ -59,6 +58,28 @@ func (u Updater) Update(ctx context.Context) error {
 
 	slog.Debug("Update complete", "took", time.Since(start))
 	return nil
+}
+
+func (u Updater) getPublicIP(ctx context.Context) (lookup.Response, error) {
+	sources, err := u.conf.Sources()
+	if err != nil {
+		return lookup.Response{}, err
+	}
+
+	lookupClient := lookup.NewClient(
+		lookup.WithV4(u.conf.UseV4),
+		lookup.WithV6(u.conf.UseV6),
+		lookup.WithForceTCP(u.conf.DNSUseTCP),
+		lookup.WithSources(sources...),
+	)
+
+	publicIP, err := lookupClient.GetPublicIP(ctx)
+	if err != nil {
+		return lookup.Response{}, err
+	}
+
+	slog.Debug("Got public IP", "ip", publicIP)
+	return publicIP, nil
 }
 
 func (u Updater) updateDomain(ctx context.Context, domain string, ip lookup.Response) error {

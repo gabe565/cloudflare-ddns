@@ -4,7 +4,7 @@ import (
 	"io"
 	"strings"
 
-	"gabe565.com/cloudflare-ddns/internal/config"
+	"gabe565.com/cloudflare-ddns/internal/lookup"
 	"gabe565.com/cloudflare-ddns/internal/output"
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -48,7 +48,7 @@ func helpFunc(cmd *cobra.Command, _ []string) {
 		t.AppendHeader(table.Row{bold("Name"), bold("Description")})
 	}
 
-	sources := config.SourceValues()
+	sources := lookup.SourceValues()
 
 	for _, v := range sources {
 		if format == output.FormatMarkdown {

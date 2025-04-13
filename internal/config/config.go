@@ -3,6 +3,7 @@ package config
 import (
 	"time"
 
+	"gabe565.com/cloudflare-ddns/internal/lookup"
 	"gabe565.com/utils/slogx"
 	"github.com/cloudflare/cloudflare-go/v4"
 	"github.com/cloudflare/cloudflare-go/v4/option"
@@ -35,13 +36,13 @@ func New() *Config {
 		UseV4:   true,
 		Timeout: time.Minute,
 		SourceStrs: []string{
-			SourceCloudflareTLS.String(),
-			SourceOpenDNSTLS.String(),
-			SourceICanHazIP.String(),
-			SourceIPInfo.String(),
-			SourceIPify.String(),
-			SourceCloudflare.String(),
-			SourceOpenDNS.String(),
+			lookup.CloudflareTLS.String(),
+			lookup.OpenDNSTLS.String(),
+			lookup.ICanHazIP.String(),
+			lookup.IPInfo.String(),
+			lookup.IPify.String(),
+			lookup.Cloudflare.String(),
+			lookup.OpenDNS.String(),
 		},
 	}
 }
@@ -71,10 +72,10 @@ func (c *Config) CloudflareZoneListParams() zones.ZoneListParams {
 	return params
 }
 
-func (c *Config) Sources() ([]Source, error) {
-	s := make([]Source, 0, len(c.SourceStrs))
+func (c *Config) Sources() ([]lookup.Source, error) {
+	s := make([]lookup.Source, 0, len(c.SourceStrs))
 	for _, str := range c.SourceStrs {
-		source, err := SourceString(str)
+		source, err := lookup.SourceString(str)
 		if err != nil {
 			return nil, err
 		}

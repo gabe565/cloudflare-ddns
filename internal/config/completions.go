@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 
+	"gabe565.com/cloudflare-ddns/internal/lookup"
 	"gabe565.com/utils/must"
 	"gabe565.com/utils/slogx"
 	"github.com/cloudflare/cloudflare-go/v4"
@@ -29,7 +30,7 @@ func (c *Config) RegisterCompletions(cmd *cobra.Command) {
 	must.Must(cmd.RegisterFlagCompletionFunc(
 		FlagSource,
 		func(_ *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
-			return SourceStrings(), cobra.ShellCompDirectiveNoFileComp
+			return lookup.SourceStrings(), cobra.ShellCompDirectiveNoFileComp
 		},
 	))
 	must.Must(cmd.RegisterFlagCompletionFunc(FlagDomain, CompleteDomain))
