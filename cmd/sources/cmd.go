@@ -6,8 +6,8 @@ import (
 
 	"gabe565.com/cloudflare-ddns/internal/lookup"
 	"gabe565.com/cloudflare-ddns/internal/output"
-	"github.com/fatih/color"
-	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/table"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +27,7 @@ func New() *cobra.Command {
 func helpFunc(cmd *cobra.Command, _ []string) {
 	format, _ := output.FromContext(cmd.Context())
 
-	italic := color.New(color.Italic).Sprint
+	italic := lipgloss.NewStyle().Italic(true).Render
 	var result strings.Builder
 	if format == output.FormatMarkdown {
 		result.WriteString(
@@ -39,30 +39,40 @@ func helpFunc(cmd *cobra.Command, _ []string) {
 			"Available Sources:\n")
 	}
 
-	t := output.NewTable()
+	t := table.New().
+		Headers("Name", "Description")
 
-	bold := color.New(color.Bold).Sprint
+	pad := lipgloss.NewStyle().Padding(0, 1)
 	if format == output.FormatMarkdown {
-		t.AppendHeader(table.Row{"Name", "Description"})
+		t.Border(lipgloss.MarkdownBorder()).
+			BorderTop(false).
+			BorderBottom(false).
+			StyleFunc(func(int, int) lipgloss.Style {
+				return pad
+			})
 	} else {
-		t.AppendHeader(table.Row{bold("Name"), bold("Description")})
+		bold := pad.Bold(true)
+		t.StyleFunc(func(row, col int) lipgloss.Style {
+			switch {
+			case col == 0, row == -1:
+				return bold
+			default:
+				return pad
+			}
+		})
 	}
 
 	sources := lookup.SourceValues()
 
 	for _, v := range sources {
 		if format == output.FormatMarkdown {
-			t.AppendRow(table.Row{"`" + v.String() + "`", v.Description(output.FormatMarkdown)})
+			t.Row("`"+v.String()+"`", v.Description(output.FormatMarkdown))
 		} else {
-			t.AppendRow(table.Row{bold(v.String()), v.Description(output.FormatANSI)})
+			t.Row(v.String(), v.Description(output.FormatANSI))
 		}
 	}
 
-	if format == output.FormatMarkdown {
-		result.WriteString(t.RenderMarkdown())
-	} else {
-		result.WriteString(t.Render())
-	}
+	result.WriteString(t.Render())
 	result.WriteByte('\n')
 	_, _ = io.WriteString(cmd.OutOrStdout(), result.String())
 }

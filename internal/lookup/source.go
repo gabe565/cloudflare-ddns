@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"gabe565.com/cloudflare-ddns/internal/output"
-	"github.com/fatih/color"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/miekg/dns"
 )
 
@@ -38,7 +38,7 @@ type HTTPv4v6 struct {
 func (d HTTPv4v6) Description(format output.Format) string {
 	switch format {
 	case output.FormatANSI:
-		bold := color.New(color.Bold).Sprint
+		bold := lipgloss.NewStyle().Bold(true).Render
 		return "Makes HTTPS requests to " + bold(d.URLv4) + " and " + bold(d.URLv6) + "."
 	case output.FormatMarkdown:
 		return "Makes HTTPS requests to `" + d.URLv4 + "` and `" + d.URLv6 + "`."
@@ -62,7 +62,7 @@ func (d DNSv4v6) Description(format output.Format) string {
 	}
 	switch format {
 	case output.FormatANSI:
-		bold := color.New(color.Bold).Sprint
+		bold := lipgloss.NewStyle().Bold(true).Render
 		return "Queries " + bold(
 			strings.TrimSuffix(d.QuestionV4.Name, "."),
 		) + " using " + proto + " via " + bold(

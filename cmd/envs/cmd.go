@@ -8,8 +8,8 @@ import (
 
 	"gabe565.com/cloudflare-ddns/internal/config"
 	"gabe565.com/cloudflare-ddns/internal/output"
-	"github.com/fatih/color"
-	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/table"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -37,19 +37,35 @@ func helpFunc(cmd *cobra.Command, _ []string) {
 		result.WriteString("Environment Variables\n\n")
 	}
 
-	t := output.NewTable()
+	t := table.New().
+		Headers("Name", "Usage", "Default")
 
-	bold := color.New(color.Bold).Sprint
+	pad := lipgloss.NewStyle().Padding(0, 1)
 	if format == output.FormatMarkdown {
-		t.AppendHeader(table.Row{"Name", "Usage", "Default"})
+		t.Border(lipgloss.MarkdownBorder()).
+			BorderTop(false).
+			BorderBottom(false).
+			StyleFunc(func(int, int) lipgloss.Style {
+				return pad
+			})
 	} else {
-		t.AppendHeader(table.Row{bold("Name"), bold("Usage"), bold("Default")})
+		bold := pad.Bold(true)
+		italic := pad.Italic(true)
+		t.StyleFunc(func(row, col int) lipgloss.Style {
+			switch {
+			case col == 0, row == -1:
+				return bold
+			case col == 2:
+				return italic
+			default:
+				return pad
+			}
+		})
 	}
 
 	root := cmd.Root()
 	excludeNames := []string{"completion", "help", "version"}
-	var rows []table.Row
-	italic := color.New(color.Italic).Sprint
+	var rows [][]string
 	root.Flags().VisitAll(func(flag *pflag.Flag) {
 		if slices.Contains(excludeNames, flag.Name) {
 			return
@@ -67,22 +83,17 @@ func helpFunc(cmd *cobra.Command, _ []string) {
 			if value == "" {
 				value = " "
 			}
-			rows = append(rows, table.Row{"`" + config.EnvName(flag.Name) + "`", flag.Usage, "`" + value + "`"})
+			rows = append(rows, []string{"`" + config.EnvName(flag.Name) + "`", flag.Usage, "`" + value + "`"})
 		} else {
-			rows = append(rows, table.Row{bold(config.EnvName(flag.Name)), flag.Usage, italic(value)})
+			rows = append(rows, []string{config.EnvName(flag.Name), flag.Usage, value})
 		}
 	})
-	slices.SortFunc(rows, func(a, b table.Row) int {
-		//nolint:errcheck
-		return cmp.Compare(a[0].(string), b[0].(string))
+	slices.SortFunc(rows, func(a, b []string) int {
+		return cmp.Compare(a[0], b[0])
 	})
-	t.AppendRows(rows)
+	t.Rows(rows...)
 
-	if format == output.FormatMarkdown {
-		result.WriteString(t.RenderMarkdown())
-	} else {
-		result.WriteString(t.Render())
-	}
+	result.WriteString(t.Render())
 	result.WriteByte('\n')
 	_, _ = io.WriteString(cmd.OutOrStdout(), result.String())
 }
