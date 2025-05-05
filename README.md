@@ -112,11 +112,14 @@ To authenticate to the Cloudflare API, set either `CF_API_TOKEN` or `CF_API_KEY`
 
 ### One-Off Mode
 Runs once, then exits. Useful for crontab, systemd timers, or Kubernetes CronJobs.
+
+#### Local
 ```shell
 export CF_API_TOKEN=token
 cloudflare-ddns example.com
 ```
-One-off mode can also be run in Docker.
+
+#### Docker
 ```shell
 docker run --rm -it \
   -e CF_API_TOKEN=token \
@@ -126,11 +129,14 @@ docker run --rm -it \
 
 ### Daemon Mode
 Runs continuously, updating the DNS record every specified interval.
+
+#### Local
 ```shell
 export CF_API_TOKEN=token
 cloudflare-ddns example.com --interval=10m
 ```
-Daemon mode can also be run in Docker.
+
+#### Docker
 ```shell
 docker run --rm -d --restart=always \
   -e CF_API_TOKEN=token \
@@ -141,4 +147,4 @@ docker run --rm -d --restart=always \
 ### Full Reference
 - [Command line usage](docs/cloudflare-ddns.md)
 - [Environment variables](docs/cloudflare-ddns_envs.md)
-- [Sources](docs/cloudflare-ddns_sources.md)
+- [Public IP Sources](docs/cloudflare-ddns_sources.md)

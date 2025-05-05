@@ -21,4 +21,4 @@
 
 ### SEE ALSO
 * [cloudflare-ddns](cloudflare-ddns.md)  - Sync a Cloudflare DNS record with your current public IP address
-* [cloudflare-ddns sources](cloudflare-ddns_sources.md)  - Source reference
+* [cloudflare-ddns sources](cloudflare-ddns_sources.md)  - Public IP source reference

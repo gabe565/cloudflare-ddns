@@ -31,4 +31,4 @@ cloudflare-ddns [flags]
 
 ### SEE ALSO
 * [cloudflare-ddns envs](cloudflare-ddns_envs.md)  - Environment variable reference
-* [cloudflare-ddns sources](cloudflare-ddns_sources.md)  - Source reference
+* [cloudflare-ddns sources](cloudflare-ddns_sources.md)  - Public IP source reference

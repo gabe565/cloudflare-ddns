@@ -16,7 +16,7 @@ const Name = "sources"
 func New() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   Name,
-		Short: "Source reference",
+		Short: "Public IP source reference",
 
 		ValidArgsFunction: cobra.NoFileCompletions,
 	}
@@ -31,7 +31,7 @@ func helpFunc(cmd *cobra.Command, _ []string) {
 	var result strings.Builder
 	if format == output.FormatMarkdown {
 		result.WriteString(
-			"# Sources\n\nThe `--source` flag lets you define which sources are used to get your public IP address.\n\n" +
+			"# Public IP Sources\n\nThe `--source` flag lets you define which sources are used to get your public IP address.\n\n" +
 				"## Available Sources\n\n",
 		)
 	} else {
