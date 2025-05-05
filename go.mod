@@ -5,7 +5,7 @@ go 1.24.2
 require (
 	gabe565.com/utils v0.0.0-20250302063333-ede73b14282c
 	github.com/charmbracelet/lipgloss v1.1.0
-	github.com/cloudflare/cloudflare-go/v4 v4.2.0
+	github.com/cloudflare/cloudflare-go/v4 v4.3.0
 	github.com/lmittmann/tint v1.0.7
 	github.com/miekg/dns v1.1.65
 	github.com/spf13/cobra v1.9.2-0.20250311125636-ceb39aba25c8
