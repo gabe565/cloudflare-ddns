@@ -6,7 +6,7 @@ require (
 	gabe565.com/utils v0.0.0-20250302063333-ede73b14282c
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/cloudflare/cloudflare-go/v4 v4.3.0
-	github.com/lmittmann/tint v1.0.7
+	github.com/lmittmann/tint v1.1.2
 	github.com/miekg/dns v1.1.65
 	github.com/spf13/cobra v1.9.2-0.20250531123604-6dec1ae26659
 	github.com/spf13/pflag v1.0.6
