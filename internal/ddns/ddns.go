@@ -97,13 +97,13 @@ func (u Updater) updateDomain(ctx context.Context, domain string, ip lookup.Resp
 
 	if u.conf.UseV4 {
 		group.Go(func() error {
-			return u.updateRecord(ctx, zone, dns.RecordTypeA, v4, domain, ip.IPV4)
+			return u.updateRecord(ctx, zone, dns.RecordResponseTypeA, v4, domain, ip.IPV4)
 		})
 	}
 
 	if u.conf.UseV6 {
 		group.Go(func() error {
-			return u.updateRecord(ctx, zone, dns.RecordTypeAAAA, v6, domain, ip.IPV6)
+			return u.updateRecord(ctx, zone, dns.RecordResponseTypeAAAA, v6, domain, ip.IPV6)
 		})
 	}
 
@@ -113,7 +113,7 @@ func (u Updater) updateDomain(ctx context.Context, domain string, ip lookup.Resp
 func (u Updater) updateRecord(
 	ctx context.Context,
 	zone *zones.Zone,
-	recordType dns.RecordType,
+	recordType dns.RecordResponseType,
 	record *dns.RecordResponse,
 	domain, content string,
 ) error {
@@ -124,7 +124,7 @@ func (u Updater) updateRecord(
 		if !u.conf.DryRun {
 			_, err := u.client.DNS.Records.New(ctx, dns.RecordNewParams{
 				ZoneID: cloudflare.F(zone.ID),
-				Record: newRecordParam(recordType, domain, content, u.conf.Proxied, dns.TTL(u.conf.TTL)),
+				Body:   newRecordParam(recordType, domain, content, u.conf.Proxied, dns.TTL(u.conf.TTL)),
 			})
 			return err
 		}
@@ -133,7 +133,7 @@ func (u Updater) updateRecord(
 		if !u.conf.DryRun {
 			_, err := u.client.DNS.Records.Update(ctx, record.ID, dns.RecordUpdateParams{
 				ZoneID: cloudflare.F(zone.ID),
-				Record: newRecordParam(recordType, domain, content, u.conf.Proxied, dns.TTL(u.conf.TTL)),
+				Body:   newRecordParam(recordType, domain, content, u.conf.Proxied, dns.TTL(u.conf.TTL)),
 			})
 			return err
 		}
@@ -196,16 +196,41 @@ func (u Updater) GetRecords(
 	return v4, v6, fmt.Errorf("%w: %s", ErrRecordNotFound, domain)
 }
 
-func newRecordParam(recordType dns.RecordType, domain, content string, proxied bool, ttl dns.TTL) dns.RecordParam {
+type newRecordResponse interface {
+	dns.RecordNewParamsBodyUnion
+	dns.RecordUpdateParamsBodyUnion
+}
+
+func newRecordParam(
+	recordType dns.RecordResponseType,
+	domain, content string,
+	proxied bool,
+	ttl dns.TTL,
+) newRecordResponse {
 	if ttl == 0 {
 		ttl = dns.TTL1
 	}
-	return dns.RecordParam{
-		Comment: cloudflare.F("DDNS record managed by gabe565/cloudflare-ddns"),
-		Content: cloudflare.F(content),
-		Name:    cloudflare.F(domain),
-		Proxied: cloudflare.F(proxied),
-		TTL:     cloudflare.F(ttl),
-		Type:    cloudflare.F(recordType),
+
+	switch recordType {
+	case dns.RecordResponseTypeA:
+		return dns.ARecordParam{
+			Name:    cloudflare.F(domain),
+			Type:    cloudflare.F(dns.ARecordTypeA),
+			Comment: cloudflare.F("DDNS record managed by gabe565/cloudflare-ddns"),
+			Content: cloudflare.F(content),
+			Proxied: cloudflare.F(proxied),
+			TTL:     cloudflare.F(ttl),
+		}
+	case dns.RecordResponseTypeAAAA:
+		return dns.AAAARecordParam{
+			Name:    cloudflare.F(domain),
+			Type:    cloudflare.F(dns.AAAARecordTypeAAAA),
+			Comment: cloudflare.F("DDNS record managed by gabe565/cloudflare-ddns"),
+			Content: cloudflare.F(content),
+			Proxied: cloudflare.F(proxied),
+			TTL:     cloudflare.F(ttl),
+		}
+	default:
+		panic("invalid record type: " + recordType)
 	}
 }
