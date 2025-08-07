@@ -123,8 +123,8 @@ cloudflare-ddns example.com
 ```shell
 docker run --rm -it \
   -e CF_API_TOKEN=token \
+  -e DDNS_DOMAINS=example.com \
   ghcr.io/gabe565/cloudflare-ddns \
-  example.com
 ```
 
 ### Daemon Mode
@@ -140,8 +140,9 @@ cloudflare-ddns example.com --interval=10m
 ```shell
 docker run --rm -d --restart=always \
   -e CF_API_TOKEN=token \
-  ghcr.io/gabe565/cloudflare-ddns \
-  example.com --interval=10m
+  -e DDNS_DOMAINS=example.com \
+  -e DDNS_INTERVAL=10m \
+  ghcr.io/gabe565/cloudflare-ddns
 ```
 
 ### Full Reference
