@@ -8,8 +8,8 @@ import (
 	"gabe565.com/cloudflare-ddns/internal/lookup"
 	"gabe565.com/utils/must"
 	"gabe565.com/utils/slogx"
-	"github.com/cloudflare/cloudflare-go/v4"
-	"github.com/cloudflare/cloudflare-go/v4/accounts"
+	"github.com/cloudflare/cloudflare-go/v5"
+	"github.com/cloudflare/cloudflare-go/v5/accounts"
 	"github.com/spf13/cobra"
 )
 
