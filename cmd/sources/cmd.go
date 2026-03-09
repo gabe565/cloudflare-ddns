@@ -4,10 +4,10 @@ import (
 	"io"
 	"strings"
 
+	"charm.land/lipgloss/v2"
+	"charm.land/lipgloss/v2/table"
 	"gabe565.com/cloudflare-ddns/internal/lookup"
 	"gabe565.com/cloudflare-ddns/internal/output"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/table"
 	"github.com/spf13/cobra"
 )
 
