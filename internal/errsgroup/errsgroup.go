@@ -12,15 +12,13 @@ type Group struct {
 }
 
 func (g *Group) Go(f func() error) {
-	g.wg.Add(1)
-	go func() {
-		defer g.wg.Done()
+	g.wg.Go(func() {
 		if err := f(); err != nil {
 			g.mu.Lock()
 			g.errs = append(g.errs, err)
 			g.mu.Unlock()
 		}
-	}()
+	})
 }
 
 func (g *Group) Wait() error {

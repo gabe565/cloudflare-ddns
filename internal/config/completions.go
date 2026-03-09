@@ -123,8 +123,8 @@ func CompleteDomain(
 		for _, zone := range comps {
 			prefix := toComplete
 			for {
-				if strings.HasPrefix(zone, prefix) {
-					overlaps = append(overlaps, strings.TrimPrefix(zone, prefix))
+				if after, ok := strings.CutPrefix(zone, prefix); ok {
+					overlaps = append(overlaps, after)
 					break
 				}
 
