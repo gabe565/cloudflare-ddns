@@ -8,7 +8,7 @@ require (
 	github.com/cloudflare/cloudflare-go/v4 v4.5.1
 	github.com/lmittmann/tint v1.1.2
 	github.com/miekg/dns v1.1.66
-	github.com/spf13/cobra v1.9.2-0.20250531123604-6dec1ae26659
+	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.10.0
 )
@@ -36,6 +36,7 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
+	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/net v0.39.0 // indirect
 	golang.org/x/sync v0.13.0 // indirect
