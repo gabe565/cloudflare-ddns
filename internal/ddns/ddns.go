@@ -11,9 +11,9 @@ import (
 	"gabe565.com/cloudflare-ddns/internal/config"
 	"gabe565.com/cloudflare-ddns/internal/errsgroup"
 	"gabe565.com/cloudflare-ddns/internal/lookup"
-	"github.com/cloudflare/cloudflare-go/v4"
-	"github.com/cloudflare/cloudflare-go/v4/dns"
-	"github.com/cloudflare/cloudflare-go/v4/zones"
+	"github.com/cloudflare/cloudflare-go/v6"
+	"github.com/cloudflare/cloudflare-go/v6/dns"
+	"github.com/cloudflare/cloudflare-go/v6/zones"
 )
 
 func NewUpdater(conf *config.Config) Updater {
