@@ -3,8 +3,8 @@ package lookup
 import (
 	"strings"
 
+	"charm.land/lipgloss/v2"
 	"gabe565.com/cloudflare-ddns/internal/output"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/miekg/dns"
 )
 
