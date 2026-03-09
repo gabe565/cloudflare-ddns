@@ -3,7 +3,7 @@ module gabe565.com/cloudflare-ddns
 go 1.26.1
 
 require (
-	gabe565.com/utils v0.0.0-20250302063333-ede73b14282c
+	gabe565.com/utils v0.0.0-20251001054419-00a1424779a7
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/cloudflare/cloudflare-go/v4 v4.5.1
 	github.com/lmittmann/tint v1.1.2
