@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"io"
 	"os"
-	"path/filepath"
 	"time"
 
 	"gabe565.com/cloudflare-ddns/cmd"
+	"gabe565.com/utils/cobrax"
 	flag "github.com/spf13/pflag"
 )
 
@@ -34,18 +34,27 @@ func main() {
 		panic(err)
 	}
 
+	root, err := os.OpenRoot("completions")
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = root.Close()
+	}()
+
 	rootCmd := cmd.New()
 	name := rootCmd.Name()
 	var buf bytes.Buffer
 	rootCmd.SetOut(&buf)
 
-	for _, shell := range []string{"bash", "zsh", "fish"} {
-		rootCmd.SetArgs([]string{"completion", shell})
-		if err := rootCmd.Execute(); err != nil {
+	for _, shell := range []cobrax.Shell{cobrax.Bash, cobrax.Zsh, cobrax.Fish} {
+		if err := cobrax.GenCompletion(rootCmd, shell); err != nil {
 			panic(err)
 		}
 
-		f, err := os.Create(filepath.Join("completions", name+"."+shell))
+		path := name + "." + string(shell)
+
+		f, err := root.Create(path)
 		if err != nil {
 			panic(err)
 		}
@@ -58,7 +67,7 @@ func main() {
 			panic(err)
 		}
 
-		if err := os.Chtimes(f.Name(), date, date); err != nil {
+		if err := root.Chtimes(path, date, date); err != nil {
 			panic(err)
 		}
 	}

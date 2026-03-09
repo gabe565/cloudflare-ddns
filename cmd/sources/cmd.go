@@ -35,8 +35,11 @@ func helpFunc(cmd *cobra.Command, _ []string) {
 				"## Available Sources\n\n",
 		)
 	} else {
-		result.WriteString("The " + italic("--source") + " flag lets you define which sources are used to get your public IP address.\n\n" +
-			"Available Sources:\n")
+		result.WriteString(
+			"The " + italic("--source") +
+				" flag lets you define which sources are used to get your public IP address.\n\n" +
+				"Available Sources:\n",
+		)
 	}
 
 	t := table.New().

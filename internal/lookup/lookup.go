@@ -25,7 +25,7 @@ type Client struct {
 var ErrAllSourcesFailed = errors.New("all sources failed")
 
 func (c *Client) GetPublicIP(ctx context.Context) (Response, error) {
-	var errs []error //nolint:prealloc
+	var errs []error
 	for _, source := range c.sources {
 		slogx.Trace("Querying source", "name", source)
 		var response Response

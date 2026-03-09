@@ -99,7 +99,11 @@ func addSeeAlso(buf *bytes.Buffer, cmd *cobra.Command, cmds ...*cobra.Command) {
 		if cmd.Name() == subcmd.Name() {
 			fmt.Fprintf(buf, "* [%s](%s.md)  - %s\n", subcmd.Name(), subcmd.Name(), subcmd.Short)
 		} else {
-			fmt.Fprintf(buf, "* [%s %s](%s_%s.md)  - %s\n", cmd.Name(), subcmd.Name(), cmd.Name(), subcmd.Name(), subcmd.Short)
+			fmt.Fprintf(buf, "* [%s %s](%s_%s.md)  - %s\n",
+				cmd.Name(), subcmd.Name(),
+				cmd.Name(), subcmd.Name(),
+				subcmd.Short,
+			)
 		}
 	}
 }

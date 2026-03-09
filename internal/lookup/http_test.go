@@ -28,7 +28,7 @@ func newHTTPServer(t *testing.T, network string) *httptest.Server {
 	}
 
 	var err error
-	server.Listener, err = net.Listen(network, addr)
+	server.Listener, err = (&net.ListenConfig{}).Listen(t.Context(), network, addr)
 	require.NoError(t, err)
 
 	server.Start()
