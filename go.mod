@@ -4,7 +4,7 @@ go 1.26.1
 
 require (
 	charm.land/lipgloss/v2 v2.0.0
-	gabe565.com/utils v0.0.0-20251001054419-00a1424779a7
+	gabe565.com/utils v0.0.0-20260310002041-b3b94f17b36b
 	github.com/cloudflare/cloudflare-go/v6 v6.8.0
 	github.com/lmittmann/tint v1.1.3
 	github.com/miekg/dns v1.1.72
