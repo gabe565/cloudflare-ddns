@@ -3,7 +3,7 @@ module gabe565.com/cloudflare-ddns
 go 1.26.1
 
 require (
-	charm.land/lipgloss/v2 v2.0.0
+	charm.land/lipgloss/v2 v2.0.2
 	gabe565.com/utils v0.0.0-20251001054419-00a1424779a7
 	github.com/cloudflare/cloudflare-go/v6 v6.8.0
 	github.com/lmittmann/tint v1.1.3
@@ -43,7 +43,7 @@ require (
 	golang.org/x/mod v0.31.0 // indirect
 	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/tools v0.40.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
