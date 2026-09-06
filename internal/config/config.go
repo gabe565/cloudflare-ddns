@@ -5,9 +5,9 @@ import (
 
 	"gabe565.com/cloudflare-ddns/internal/lookup"
 	"gabe565.com/utils/slogx"
-	"github.com/cloudflare/cloudflare-go/v6"
-	"github.com/cloudflare/cloudflare-go/v6/option"
-	"github.com/cloudflare/cloudflare-go/v6/zones"
+	"github.com/cloudflare/cloudflare-go/v7"
+	"github.com/cloudflare/cloudflare-go/v7/option"
+	"github.com/cloudflare/cloudflare-go/v7/zones"
 )
 
 type Config struct {
