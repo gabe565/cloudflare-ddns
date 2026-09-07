@@ -56,20 +56,26 @@ changelog:
       regexp: '\(deps\):'
     - title: Others
       order: 998
-brews:
+homebrew_casks:
   - homepage: https://github.com/gabe565/cloudflare-ddns
     description: Sync a Cloudflare DNS record with your current public IP address
-    license: Apache2
     repository:
       owner: gabe565
       name: homebrew-tap
-    directory: Formula
-    install: |
-      bin.install "cloudflare-ddns"
-      man1.install "manpages/cloudflare-ddns.1.gz"
-      bash_completion.install "completions/cloudflare-ddns.bash" => "cloudflare-ddns"
-      zsh_completion.install "completions/cloudflare-ddns.zsh" => "_cloudflare-ddns"
-      fish_completion.install "completions/cloudflare-ddns.fish"
+    binaries:
+      - cloudflare-ddns
+    manpages:
+      - manpages/*
+    completions:
+      bash: completions/cloudflare-ddns.bash
+      zsh: completions/cloudflare-ddns.zsh
+      fish: completions/cloudflare-ddns.fish
+    hooks:
+      post:
+        install: |
+          if OS.mac? && system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/cloudflare-ddns"]
+          end
 nfpms:
   - id: packages
     vendor: Gabe Cook
