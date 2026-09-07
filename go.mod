@@ -6,7 +6,7 @@ require (
 	charm.land/lipgloss/v2 v2.0.0
 	gabe565.com/utils v0.0.0-20251001054419-00a1424779a7
 	github.com/cloudflare/cloudflare-go/v7 v7.10.0
-	github.com/lmittmann/tint v1.1.3
+	github.com/lmittmann/tint v1.2.0
 	github.com/miekg/dns v1.1.72
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
