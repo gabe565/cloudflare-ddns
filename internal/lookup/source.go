@@ -134,10 +134,8 @@ func (s Source) Request() Requestv4v6 { //nolint:ireturn
 			TLS: tls,
 		}
 	case ICanHazIP:
-		return HTTPv4v6{
-			URLv4: "https://ipv4.icanhazip.com",
-			URLv6: "https://ipv6.icanhazip.com",
-		}
+		const url = "https://icanhazip.com"
+		return HTTPv4v6{URLv4: url, URLv6: url}
 	case AWS:
 		const url = "https://checkip.global.api.aws"
 		return HTTPv4v6{URLv4: url, URLv6: url}
