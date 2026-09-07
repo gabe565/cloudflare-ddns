@@ -9,6 +9,8 @@ Cloudflare DDNS is a command-line dynamic DNS tool that keeps Cloudflare DNS rec
 - **Multiple IP Sources:** Tries multiple sources in order for fetching your public IP:
   - Cloudflare DNS (TLS) (using `whoami.cloudflare`)
   - OpenDNS (TLS) (using `myip.opendns.com`)
+  - Cloudflare STUN (using `stun.cloudflare.com`)
+  - Google STUN (using `stun.l.google.com`)
   - [icanhazip.com](https://icanhazip.com)
   - [AWS](https://checkip.global.api.aws)
   - [ipinfo.io](https://ipinfo.io)

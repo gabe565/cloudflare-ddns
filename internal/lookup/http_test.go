@@ -22,9 +22,9 @@ func newHTTPServer(t *testing.T, network string) *httptest.Server {
 		}
 	}))
 
-	addr := "127.0.0.1:0"
+	addr := loopbackV4
 	if network == tcp6 {
-		addr = "[::1]:0"
+		addr = loopbackV6
 	}
 
 	var err error

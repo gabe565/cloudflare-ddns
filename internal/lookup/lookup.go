@@ -31,6 +31,8 @@ func (c *Client) GetPublicIP(ctx context.Context) (Response, error) {
 		var response Response
 		var err error
 		switch req := source.Request().(type) {
+		case STUNv4v6:
+			response, err = c.STUNv4v6(ctx, req)
 		case DNSv4v6:
 			response, err = c.DNSv4v6(ctx, req)
 		case HTTPv4v6:

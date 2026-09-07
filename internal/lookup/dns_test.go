@@ -13,6 +13,9 @@ const (
 	domain = "test."
 	cfV4   = "1.1.1.1"
 	cfV6   = "2606:4700:4700::1111"
+
+	loopbackV4 = "127.0.0.1:0"
+	loopbackV6 = "[::1]:0"
 )
 
 func newDNSServer(t *testing.T, network string) string {
@@ -36,9 +39,9 @@ func newDNSServer(t *testing.T, network string) string {
 		require.NoError(t, err)
 	})
 
-	addr := "127.0.0.1:0"
+	addr := loopbackV4
 	if network == tcp6 {
-		addr = "[::1]:0"
+		addr = loopbackV6
 	}
 
 	ready := make(chan struct{})
