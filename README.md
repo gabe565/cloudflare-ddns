@@ -10,6 +10,7 @@ Cloudflare DDNS is a command-line dynamic DNS tool that keeps Cloudflare DNS rec
   - Cloudflare DNS (TLS) (using `whoami.cloudflare`)
   - OpenDNS (TLS) (using `myip.opendns.com`)
   - [icanhazip.com](https://icanhazip.com)
+  - [AWS](https://checkip.global.api.aws)
   - [ipinfo.io](https://ipinfo.io)
   - [ipify.org](https://ipify.org)
   - Cloudflare DNS (using `whoami.cloudflare`)

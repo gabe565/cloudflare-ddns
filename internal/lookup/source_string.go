@@ -7,11 +7,11 @@ import (
 	"strings"
 )
 
-const _SourceName = "cloudflare_tlscloudflareopendns_tlsopendnsicanhazipipinfoipify"
+const _SourceName = "cloudflare_tlscloudflareopendns_tlsopendnsicanhazipawsipinfoipify"
 
-var _SourceIndex = [...]uint8{0, 14, 24, 35, 42, 51, 57, 62}
+var _SourceIndex = [...]uint8{0, 14, 24, 35, 42, 51, 54, 60, 65}
 
-const _SourceLowerName = "cloudflare_tlscloudflareopendns_tlsopendnsicanhazipipinfoipify"
+const _SourceLowerName = "cloudflare_tlscloudflareopendns_tlsopendnsicanhazipawsipinfoipify"
 
 func (i Source) String() string {
 	if i >= Source(len(_SourceIndex)-1) {
@@ -29,11 +29,12 @@ func _SourceNoOp() {
 	_ = x[OpenDNSTLS-(2)]
 	_ = x[OpenDNS-(3)]
 	_ = x[ICanHazIP-(4)]
-	_ = x[IPInfo-(5)]
-	_ = x[IPify-(6)]
+	_ = x[AWS-(5)]
+	_ = x[IPInfo-(6)]
+	_ = x[IPify-(7)]
 }
 
-var _SourceValues = []Source{CloudflareTLS, Cloudflare, OpenDNSTLS, OpenDNS, ICanHazIP, IPInfo, IPify}
+var _SourceValues = []Source{CloudflareTLS, Cloudflare, OpenDNSTLS, OpenDNS, ICanHazIP, AWS, IPInfo, IPify}
 
 var _SourceNameToValueMap = map[string]Source{
 	_SourceName[0:14]:       CloudflareTLS,
@@ -46,10 +47,12 @@ var _SourceNameToValueMap = map[string]Source{
 	_SourceLowerName[35:42]: OpenDNS,
 	_SourceName[42:51]:      ICanHazIP,
 	_SourceLowerName[42:51]: ICanHazIP,
-	_SourceName[51:57]:      IPInfo,
-	_SourceLowerName[51:57]: IPInfo,
-	_SourceName[57:62]:      IPify,
-	_SourceLowerName[57:62]: IPify,
+	_SourceName[51:54]:      AWS,
+	_SourceLowerName[51:54]: AWS,
+	_SourceName[54:60]:      IPInfo,
+	_SourceLowerName[54:60]: IPInfo,
+	_SourceName[60:65]:      IPify,
+	_SourceLowerName[60:65]: IPify,
 }
 
 var _SourceNames = []string{
@@ -58,8 +61,9 @@ var _SourceNames = []string{
 	_SourceName[24:35],
 	_SourceName[35:42],
 	_SourceName[42:51],
-	_SourceName[51:57],
-	_SourceName[57:62],
+	_SourceName[51:54],
+	_SourceName[54:60],
+	_SourceName[60:65],
 }
 
 // SourceString retrieves an enum value from the enum constants string name.

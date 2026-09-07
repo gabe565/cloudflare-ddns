@@ -18,6 +18,7 @@ const (
 	OpenDNSTLS // opendns_tls
 	OpenDNS    // opendns
 	ICanHazIP  // icanhazip
+	AWS        // aws
 	IPInfo     // ipinfo
 	IPify      // ipify
 )
@@ -36,12 +37,19 @@ type HTTPv4v6 struct {
 }
 
 func (d HTTPv4v6) Description(format output.Format) string {
+	const prefix = "Makes HTTPS requests to "
 	switch format {
 	case output.FormatANSI:
 		bold := lipgloss.NewStyle().Bold(true).Render
-		return "Makes HTTPS requests to " + bold(d.URLv4) + " and " + bold(d.URLv6) + "."
+		if d.URLv4 == d.URLv6 {
+			return prefix + bold(d.URLv4) + "."
+		}
+		return prefix + bold(d.URLv4) + " and " + bold(d.URLv6) + "."
 	case output.FormatMarkdown:
-		return "Makes HTTPS requests to `" + d.URLv4 + "` and `" + d.URLv6 + "`."
+		if d.URLv4 == d.URLv6 {
+			return prefix + "`" + d.URLv4 + "`."
+		}
+		return prefix + "`" + d.URLv4 + "` and `" + d.URLv6 + "`."
 	default:
 		panic("unimplemented format: " + format)
 	}
@@ -130,6 +138,9 @@ func (s Source) Request() Requestv4v6 { //nolint:ireturn
 			URLv4: "https://ipv4.icanhazip.com",
 			URLv6: "https://ipv6.icanhazip.com",
 		}
+	case AWS:
+		const url = "https://checkip.global.api.aws"
+		return HTTPv4v6{URLv4: url, URLv6: url}
 	case IPInfo:
 		return HTTPv4v6{
 			URLv4: "https://ipinfo.io/ip",
