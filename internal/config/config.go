@@ -39,7 +39,6 @@ func New() *Config {
 			lookup.CloudflareTLS.String(),
 			lookup.OpenDNSTLS.String(),
 			lookup.ICanHazIP.String(),
-			lookup.IPify.String(),
 			lookup.Cloudflare.String(),
 			lookup.OpenDNS.String(),
 		},
