@@ -9,7 +9,7 @@ import (
 
 	"gabe565.com/cloudflare-ddns/internal/errsgroup"
 	"gabe565.com/utils/slogx"
-	"github.com/pion/stun/v3"
+	"github.com/pion/stun/v4"
 )
 
 const (

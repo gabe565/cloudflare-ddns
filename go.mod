@@ -8,7 +8,7 @@ require (
 	github.com/cloudflare/cloudflare-go/v7 v7.10.0
 	github.com/lmittmann/tint v1.2.0
 	github.com/miekg/dns v1.1.73
-	github.com/pion/stun/v3 v3.1.7
+	github.com/pion/stun/v4 v4.0.0
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.12.1
@@ -31,7 +31,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.24 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/pascaldekloe/name v1.0.0 // indirect
-	github.com/pion/dtls/v3 v3.1.5 // indirect
+	github.com/pion/dtls/v3 v3.1.8 // indirect
 	github.com/pion/logging v0.2.4 // indirect
 	github.com/pion/transport/v4 v4.1.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
