@@ -7,11 +7,11 @@ import (
 	"strings"
 )
 
-const _SourceName = "cloudflare_tlscloudflareopendns_tlsopendnsicanhazipawsipinfoipify"
+const _SourceName = "cloudflare_tlscloudflareopendns_tlsopendnscloudflare_stungoogle_stunicanhazipawsipinfoipify"
 
-var _SourceIndex = [...]uint8{0, 14, 24, 35, 42, 51, 54, 60, 65}
+var _SourceIndex = [...]uint8{0, 14, 24, 35, 42, 57, 68, 77, 80, 86, 91}
 
-const _SourceLowerName = "cloudflare_tlscloudflareopendns_tlsopendnsicanhazipawsipinfoipify"
+const _SourceLowerName = "cloudflare_tlscloudflareopendns_tlsopendnscloudflare_stungoogle_stunicanhazipawsipinfoipify"
 
 func (i Source) String() string {
 	if i >= Source(len(_SourceIndex)-1) {
@@ -28,13 +28,15 @@ func _SourceNoOp() {
 	_ = x[Cloudflare-(1)]
 	_ = x[OpenDNSTLS-(2)]
 	_ = x[OpenDNS-(3)]
-	_ = x[ICanHazIP-(4)]
-	_ = x[AWS-(5)]
-	_ = x[IPInfo-(6)]
-	_ = x[IPify-(7)]
+	_ = x[CloudflareSTUN-(4)]
+	_ = x[GoogleSTUN-(5)]
+	_ = x[ICanHazIP-(6)]
+	_ = x[AWS-(7)]
+	_ = x[IPInfo-(8)]
+	_ = x[IPify-(9)]
 }
 
-var _SourceValues = []Source{CloudflareTLS, Cloudflare, OpenDNSTLS, OpenDNS, ICanHazIP, AWS, IPInfo, IPify}
+var _SourceValues = []Source{CloudflareTLS, Cloudflare, OpenDNSTLS, OpenDNS, CloudflareSTUN, GoogleSTUN, ICanHazIP, AWS, IPInfo, IPify}
 
 var _SourceNameToValueMap = map[string]Source{
 	_SourceName[0:14]:       CloudflareTLS,
@@ -45,14 +47,18 @@ var _SourceNameToValueMap = map[string]Source{
 	_SourceLowerName[24:35]: OpenDNSTLS,
 	_SourceName[35:42]:      OpenDNS,
 	_SourceLowerName[35:42]: OpenDNS,
-	_SourceName[42:51]:      ICanHazIP,
-	_SourceLowerName[42:51]: ICanHazIP,
-	_SourceName[51:54]:      AWS,
-	_SourceLowerName[51:54]: AWS,
-	_SourceName[54:60]:      IPInfo,
-	_SourceLowerName[54:60]: IPInfo,
-	_SourceName[60:65]:      IPify,
-	_SourceLowerName[60:65]: IPify,
+	_SourceName[42:57]:      CloudflareSTUN,
+	_SourceLowerName[42:57]: CloudflareSTUN,
+	_SourceName[57:68]:      GoogleSTUN,
+	_SourceLowerName[57:68]: GoogleSTUN,
+	_SourceName[68:77]:      ICanHazIP,
+	_SourceLowerName[68:77]: ICanHazIP,
+	_SourceName[77:80]:      AWS,
+	_SourceLowerName[77:80]: AWS,
+	_SourceName[80:86]:      IPInfo,
+	_SourceLowerName[80:86]: IPInfo,
+	_SourceName[86:91]:      IPify,
+	_SourceLowerName[86:91]: IPify,
 }
 
 var _SourceNames = []string{
@@ -60,10 +66,12 @@ var _SourceNames = []string{
 	_SourceName[14:24],
 	_SourceName[24:35],
 	_SourceName[35:42],
-	_SourceName[42:51],
-	_SourceName[51:54],
-	_SourceName[54:60],
-	_SourceName[60:65],
+	_SourceName[42:57],
+	_SourceName[57:68],
+	_SourceName[68:77],
+	_SourceName[77:80],
+	_SourceName[80:86],
+	_SourceName[86:91],
 }
 
 // SourceString retrieves an enum value from the enum constants string name.

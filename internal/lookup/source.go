@@ -13,14 +13,16 @@ import (
 type Source uint8
 
 const (
-	CloudflareTLS Source = iota
-	Cloudflare
-	OpenDNSTLS // opendns_tls
-	OpenDNS    // opendns
-	ICanHazIP  // icanhazip
-	AWS        // aws
-	IPInfo     // ipinfo
-	IPify      // ipify
+	CloudflareTLS  Source = iota // cloudflare_tls
+	Cloudflare                   // cloudflare
+	OpenDNSTLS                   // opendns_tls
+	OpenDNS                      // opendns
+	CloudflareSTUN               // cloudflare_stun
+	GoogleSTUN                   // google_stun
+	ICanHazIP                    // icanhazip
+	AWS                          // aws
+	IPInfo                       // ipinfo
+	IPify                        // ipify
 )
 
 func (s Source) Description(format output.Format) string {
@@ -50,6 +52,29 @@ func (d HTTPv4v6) Description(format output.Format) string {
 			return prefix + "`" + d.URLv4 + "`."
 		}
 		return prefix + "`" + d.URLv4 + "` and `" + d.URLv6 + "`."
+	default:
+		panic("unimplemented format: " + format)
+	}
+}
+
+type STUNv4v6 struct {
+	ServerV4, ServerV6 string
+}
+
+func (d STUNv4v6) Description(format output.Format) string {
+	const prefix = "Sends STUN binding requests to "
+	switch format {
+	case output.FormatANSI:
+		bold := lipgloss.NewStyle().Bold(true).Render
+		if d.ServerV4 == d.ServerV6 {
+			return prefix + bold(d.ServerV4) + "."
+		}
+		return prefix + bold(d.ServerV4) + " and " + bold(d.ServerV6) + "."
+	case output.FormatMarkdown:
+		if d.ServerV4 == d.ServerV6 {
+			return prefix + "`" + d.ServerV4 + "`."
+		}
+		return prefix + "`" + d.ServerV4 + "` and `" + d.ServerV6 + "`."
 	default:
 		panic("unimplemented format: " + format)
 	}
@@ -90,6 +115,16 @@ func (s Source) Request() Requestv4v6 { //nolint:ireturn
 	var server string
 	var tls bool
 	switch s {
+	case CloudflareSTUN:
+		return STUNv4v6{
+			ServerV4: "stun.cloudflare.com:3478",
+			ServerV6: "stun.cloudflare.com:3478",
+		}
+	case GoogleSTUN:
+		return STUNv4v6{
+			ServerV4: "stun.l.google.com:19302",
+			ServerV6: "stun.l.google.com:19302",
+		}
 	case CloudflareTLS:
 		server = "one.one.one.one:853"
 		tls = true
