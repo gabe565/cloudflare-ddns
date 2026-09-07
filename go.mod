@@ -7,7 +7,7 @@ require (
 	gabe565.com/utils v0.0.0-20260511235214-4059440fa83b
 	github.com/cloudflare/cloudflare-go/v7 v7.10.0
 	github.com/lmittmann/tint v1.2.0
-	github.com/miekg/dns v1.1.72
+	github.com/miekg/dns v1.1.73
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.12.1
