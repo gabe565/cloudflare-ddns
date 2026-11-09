@@ -3,7 +3,7 @@ module gabe565.com/cloudflare-ddns
 go 1.27.1
 
 require (
-	charm.land/lipgloss/v2 v2.0.6
+	charm.land/lipgloss/v2 v2.1.0
 	gabe565.com/utils v0.0.0-20260511235214-4059440fa83b
 	github.com/cloudflare/cloudflare-go/v7 v7.10.0
 	github.com/lmittmann/tint v1.2.0
